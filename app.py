@@ -18,12 +18,15 @@ def index():
 
 @app.route('/chat', methods=['POST'])
 def chat_endpoint():
-    data = request.json
-    user_message = data.get("message")
     try:
+        data = request.get_json()
+        user_message = data.get("message")
+        
         response = chat.send_message(user_message)
-        return jsonify({"bot": response.text})
+        
+        return jsonify({"reply": response.text})
     except Exception as e:
+        print(f"Error in /chat route: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
