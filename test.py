@@ -1,9 +1,16 @@
+import os
+from dotenv import load_dotenv
 from google import genai
 
-client = genai.Client(api_key="api here ")
+# This looks for your .env file and loads the variables
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
 
-# Create chat session (with memory)
-chat = client.chats.create(model="gemini-2.5-flash")
+client = genai.Client(api_key=api_key)
+
+# Create chat session
+chat = client.chats.create(model="gemini-2.0-flash")
+
 
 print("🤖 AI Chatbot started (type 'exit' to quit)\n")
 

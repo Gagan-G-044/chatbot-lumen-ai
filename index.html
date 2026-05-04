@@ -14,12 +14,12 @@
 ═══════════════════════════════════════════ */
 :root {
   /* Base surfaces */
-  --bg-void:        #060609;
-  --bg-base:        #0a0a0f;
-  --bg-depth:       #0d0d14;
-  --bg-surface:     #111118;
-  --bg-raised:      #16161f;
-  --bg-float:       #1a1a24;
+  --bg-void:        radial-gradient(circle at top, #080b14 0%, #05090f 42%, #020309 100%);
+  --bg-base:        #08101b;
+  --bg-depth:       #0f1726;
+  --bg-surface:     rgba(14, 20, 33, 0.9);
+  --bg-raised:      rgba(18, 24, 38, 0.94);
+  --bg-float:       rgba(16, 22, 34, 0.96);
 
   /* Glass */
   --glass-fill:     rgba(255,255,255,0.028);
@@ -69,13 +69,118 @@
   /* Fonts */
   --f-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
   --f-ui:      'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+
+  /* Theme surfaces */
+  --topbar-bg: rgba(7, 11, 18, 0.86);
+  --sidebar-bg: rgba(8, 8, 13, 0.85);
+  --input-zone-bg: linear-gradient(to top, rgba(7, 11, 18, 0.96) 52%, transparent);
+  --status-bg: rgba(52,211,153,0.08);
+  --status-border: rgba(52,211,153,0.18);
+  --status-color: rgba(110,231,183,0.85);
+  --icon-btn-hover-bg: rgba(255,255,255,0.11);
+  --icon-btn-hover-border: rgba(255,255,255,0.18);
+  --icon-btn-hover-color: var(--txt-1);
+  --chip-hover-bg: rgba(255,255,255,0.1);
+  --chip-hover-border: rgba(255,255,255,0.28);
+  --chip-hover-color: rgba(165,180,252,0.9);
+  --bub-err-bg: rgba(239,68,68,0.08);
+  --bub-err-border: rgba(239,68,68,0.22);
+  --bub-err-color: rgba(252,165,165,0.9);
+
+  /* Light theme overrides */
+  --light-bg-void: linear-gradient(180deg, #ffffff 0%, #f4f6fb 50%, #e6ebf4 100%);
+  --light-bg-base: #f8fafc;
+  --light-bg-depth: #e2e8f0;
+  --light-bg-surface: #ffffff;
+  --light-bg-raised: #f1f5f9;
+  --light-bg-float: #f8fafc;
+  --light-glass-fill: rgba(255,255,255,0.88);
+  --light-glass-border: rgba(15,23,42,0.08);
+  --light-glass-border-h: rgba(15,23,42,0.14);
+  --light-txt-0: #0f172a;
+  --light-txt-1: rgba(15,23,42,0.68);
+  --light-txt-2: rgba(15,23,42,0.45);
+  --light-txt-3: rgba(15,23,42,0.3);
+  --light-stroke: rgba(15,23,42,0.08);
+  --light-stroke-h: rgba(15,23,42,0.16);
+  --light-stroke-acc: rgba(59, 130, 246, 0.25);
+  --light-topbar-bg: rgba(255,255,255,0.92);
+  --light-sidebar-bg: rgba(255,255,255,0.92);
+  --light-input-zone-bg: linear-gradient(to top, rgba(255,255,255,0.96) 52%, transparent);
+  --light-status-bg: rgba(59, 130, 246, 0.08);
+  --light-status-border: rgba(59, 130, 246, 0.2);
+  --light-status-color: rgba(37, 99, 235, 0.9);
+  --light-icon-btn-bg: rgba(255,255,255,0.82);
+  --light-icon-btn-border: rgba(148,163,184,0.22);
+  --light-icon-btn-hover-bg: rgba(255,255,255,0.95);
+  --light-icon-btn-hover-border: rgba(148,163,184,0.32);
+  --light-icon-btn-hover-color: var(--light-txt-0);
+  --light-chip-bg: rgba(255,255,255,0.88);
+  --light-chip-border: rgba(148,163,184,0.18);
+  --light-chip-color: var(--light-txt-1);
+  --light-bub-ai-bg: #ffffff;
+  --light-bub-ai-border: rgba(148,163,184,0.18);
+  --light-bub-ai-color: var(--light-txt-0);
+  --light-bub-err-bg: rgba(239,68,68,0.08);
+  --light-bub-err-border: rgba(239,68,68,0.18);
+  --light-bub-err-color: rgba(185,28,28,0.9);
+  --light-copy-btn-border: rgba(148,163,184,0.18);
+  --light-copy-btn-hover-bg: rgba(241,245,249,0.95);
+  --light-copy-btn-hover-border: rgba(148,163,184,0.28);
+  --light-copy-btn-color: var(--light-txt-2);
+}
+
+:root[data-theme="light"] {
+  --bg-void: var(--light-bg-void);
+  --bg-base: var(--light-bg-base);
+  --bg-depth: var(--light-bg-depth);
+  --bg-surface: var(--light-bg-surface);
+  --bg-raised: var(--light-bg-raised);
+  --bg-float: var(--light-bg-float);
+  --glass-fill: var(--light-glass-fill);
+  --glass-border: var(--light-glass-border);
+  --glass-border-h: var(--light-glass-border-h);
+  --txt-0: var(--light-txt-0);
+  --txt-1: var(--light-txt-1);
+  --txt-2: var(--light-txt-2);
+  --txt-3: var(--light-txt-3);
+  --stroke: var(--light-stroke);
+  --stroke-h: var(--light-stroke-h);
+  --stroke-acc: var(--light-stroke-acc);
+  --topbar-bg: var(--light-topbar-bg);
+  --sidebar-bg: var(--light-sidebar-bg);
+  --input-zone-bg: var(--light-input-zone-bg);
+  --status-bg: var(--light-status-bg);
+  --status-border: var(--light-status-border);
+  --status-color: var(--light-status-color);
+  --icon-btn-bg: var(--light-icon-btn-bg);
+  --icon-btn-border: var(--light-icon-btn-border);
+  --icon-btn-hover-bg: var(--light-icon-btn-hover-bg);
+  --icon-btn-hover-border: var(--light-icon-btn-hover-border);
+  --icon-btn-hover-color: var(--light-icon-btn-hover-color);
+  --chip-bg: var(--light-chip-bg);
+  --chip-border: var(--light-chip-border);
+  --chip-hover-bg: rgba(15,23,42,0.06);
+  --chip-hover-border: rgba(148,163,184,0.24);
+  --chip-hover-color: var(--light-txt-0);
+  --bub-ai-bg: var(--light-bub-ai-bg);
+  --bub-ai-border: var(--light-bub-ai-border);
+  --bub-ai-color: var(--light-bub-ai-color);
+  --bub-err-bg: var(--light-bub-err-bg);
+  --bub-err-border: var(--light-bub-err-border);
+  --bub-err-color: var(--light-bub-err-color);
+  --copy-btn-border: var(--light-copy-btn-border);
+  --copy-btn-hover-bg: var(--light-copy-btn-hover-bg);
+  --copy-btn-hover-border: var(--light-copy-btn-hover-border);
+  --copy-btn-color: var(--light-copy-btn-color);
 }
 
 /* ═══════════════════════════════════════════
    RESET
-═══════════════════════════════════════════ */
+═══════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; color-scheme: dark; }
+html { height: 100%; color-scheme: dark; transition: background var(--t-lg), color var(--t-lg); }
+html[data-theme="light"] { color-scheme: light; }
 body {
   height: 100%;
   font-family: var(--f-ui);
@@ -86,6 +191,7 @@ body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background var(--t), color var(--t);
 }
 
 /* ═══════════════════════════════════════════
@@ -154,7 +260,7 @@ body {
 .sidebar {
   width: var(--sidebar);
   flex-shrink: 0;
-  background: rgba(8,8,13,0.8);
+  background: var(--sidebar-bg);
   backdrop-filter: var(--glass-blur);
   border-right: 1px solid var(--stroke);
   display: flex;
@@ -293,7 +399,7 @@ body {
   display: flex; align-items: center;
   justify-content: space-between;
   padding: 14px 28px;
-  background: rgba(10,10,15,0.65);
+  background: var(--topbar-bg);
   backdrop-filter: blur(20px) saturate(1.3);
   border-bottom: 1px solid var(--stroke);
 }
@@ -343,9 +449,9 @@ body {
   transition: all var(--t) var(--ease);
 }
 .icon-btn:hover {
-  background: rgba(99,102,241,0.1);
-  border-color: rgba(99,102,241,0.3);
-  color: var(--txt-1);
+  background: var(--icon-btn-hover-bg);
+  border-color: var(--icon-btn-hover-border);
+  color: var(--icon-btn-hover-color);
   box-shadow: 0 0 12px var(--accent-glow);
 }
 .icon-btn svg { width: 14px; height: 14px; }
@@ -427,9 +533,9 @@ body {
   transition: all var(--t) var(--ease);
 }
 .chip:hover {
-  background: rgba(99,102,241,0.1);
-  border-color: rgba(99,102,241,0.28);
-  color: rgba(165,180,252,0.9);
+  background: var(--chip-hover-bg);
+  border-color: var(--chip-hover-border);
+  color: var(--chip-hover-color);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(99,102,241,0.12);
 }
@@ -516,9 +622,9 @@ body {
 }
 
 .bub-err {
-  background: rgba(239,68,68,0.07);
-  border: 1px solid rgba(239,68,68,0.2);
-  color: rgba(252,165,165,0.85);
+  background: var(--bub-err-bg);
+  border: 1px solid var(--bub-err-border);
+  color: var(--bub-err-color);
   border-radius: var(--r-xl); border-bottom-left-radius: var(--r-xs);
 }
 
@@ -641,7 +747,7 @@ body {
 .input-zone {
   position: relative; z-index: 10;
   padding: 13px 24px 20px;
-  background: linear-gradient(to top, rgba(10,10,15,0.98) 52%, transparent);
+  background: var(--input-zone-bg);
 }
 .input-inner {
   max-width: var(--chat-max); margin: 0 auto;
@@ -860,6 +966,12 @@ textarea#inp::placeholder { color: var(--txt-3); }
           <span class="status-dot"></span>
           <span class="status-text">Online</span>
         </div>
+        <button class="icon-btn" id="theme-toggle-btn" title="Switch to light mode" onclick="toggleTheme()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 18a6 6 0 100-12 6 6 0 000 12z"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M1 12h2M21 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
         <button class="icon-btn" title="Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
@@ -1141,9 +1253,34 @@ function newChat() {
 }
 
 /* ═══════════════════════════════════
+   THEME
+═══════════════════════════════════ */
+const themeStorageKey = 'lumen-theme';
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  localStorage.setItem(themeStorageKey, theme);
+
+  const toggle = $('theme-toggle-btn');
+  if (toggle) {
+    toggle.title = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+  }
+}
+
+function toggleTheme() {
+  applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem(themeStorageKey);
+  applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+}
+
+/* ═══════════════════════════════════
    INIT
 ═══════════════════════════════════ */
-window.addEventListener('load', () => inpEl.focus());
+window.addEventListener('load', () => { initTheme(); inpEl.focus(); });
 </script>
 </body>
 </html>
