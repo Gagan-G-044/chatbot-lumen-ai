@@ -1,37 +1,37 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from google import genai
+import os
+from dotenv import load_dotenv
 
+# load env
+load_dotenv()
+
+# ✅ CREATE APP FIRST
 app = Flask(__name__)
 CORS(app)
 
-# ✅ NEW CLIENT
-client = genai.Client(api_key="AIzaSyCEPqU1e0ICnwsRZ7JfkJrmDwEUOy2xVaQ")
+# API key
+api_key = os.getenv("GEMINI_API_KEY")
+client = genai.Client(api_key=api_key)
 
+# ✅ THEN routes
 @app.route("/")
 def home():
-    return "Server is running ✅"
+    return "Server running ✅"
 
 @app.route("/chat", methods=["POST"])
-def chat_api():
-    try:
-        data = request.get_json()
-        msg = data.get("message")
+def chat():
+    data = request.get_json(force=True)
+    msg = data.get("message")
 
-        if not msg:
-            return jsonify({"reply": "No message received"}), 400
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=msg
+    )
 
-        # 🔥 NEW API CALL
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=msg
-        )
+    return jsonify({"reply": response.text})
 
-        return jsonify({"reply": response.text})
-
-    except Exception as e:
-        print("ERROR:", e)
-        return jsonify({"reply": "Server error: " + str(e)}), 500
-
+# ✅ LAST
 if __name__ == "__main__":
     app.run(debug=True)
