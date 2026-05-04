@@ -1,37 +1,31 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from google import genai
+from flask import Flask, request, jsonify, send_from_directory
 import os
+from google import genai
 from dotenv import load_dotenv
 
-# load env
 load_dotenv()
+# The static_folder='.' tells Flask to look in the main folder for files
+app = Flask(__name__, static_folder='.')
 
-# ✅ CREATE APP FIRST
-app = Flask(__name__)
-CORS(app)
-
-# API key
 api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
+chat = client.chats.create(model="gemini-2.0-flash")
 
-# ✅ THEN routes
-@app.route("/")
-def home():
-    return "Server running ✅"
+@app.route('/')
+def index():
+    # This replaces that "Server running" text with your actual HTML file
+    return send_from_directory('.', 'index.html')
 
-@app.route("/chat", methods=["POST"])
-def chat():
-    data = request.get_json(force=True)
-    msg = data.get("message")
+@app.route('/chat', methods=['POST'])
+def chat_endpoint():
+    data = request.json
+    user_message = data.get("message")
+    try:
+        response = chat.send_message(user_message)
+        return jsonify({"bot": response.text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=msg
-    )
-
-    return jsonify({"reply": response.text})
-
-# ✅ LAST
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
