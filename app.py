@@ -3,19 +3,21 @@ import os
 import time
 from dotenv import load_dotenv
 
+# Try-except for imports to prevent crash on startup
 try:
     from google import genai
-    from google.genai.errors import ClientError
+    from google.genai.errors import ClientError, ServerError
 except ImportError:
     genai = None
-    ClientError = None
 
 load_dotenv()
 app = Flask(__name__, static_folder='.')
 
-# 1. Initialize the client ONCE outside the route to save resources
+# Global Client
 api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key) if genai and api_key else None
+client = None
+if genai and api_key:
+    client = genai.Client(api_key=api_key)
 
 @app.route('/')
 def index():
@@ -23,45 +25,56 @@ def index():
 
 @app.route('/chat', methods=['POST'])
 def chat_endpoint():
+    # 1. Verification Check
+    if not client:
+        return jsonify({"reply": "System Error: API Key missing or library not installed."}), 200
+
     try:
-        if not api_key or not client:
-            return jsonify({"error": "Gemini API Client not initialized. Check API Key."}), 500
-
-        if not request.is_json:
-            return jsonify({"error": "Request body must be JSON"}), 400
-
-        data = request.get_json(silent=True)
-        user_message = (data.get("message") or "").strip()
+        data = request.get_json(silent=True) or {}
+        user_message = data.get("message", "").strip()
+        
         if not user_message:
-            return jsonify({"error": "Message must not be empty"}), 400
+            return jsonify({"reply": "Say something! I can't read minds yet."}), 200
 
-        # 2. Call the model
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=user_message
-        )
+        # 2. Call the BEST Free Model (High Quota: 500 RPD)
+        # Using the latest 2026 'flash-lite' model with retry
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=user_message
+                )
+                break  # Success, exit retry loop
+            except Exception as retry_e:
+                error_str = str(retry_e)
+                if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                    if attempt < max_retries - 1:
+                        wait_time = 2 ** attempt  # Exponential backoff: 1, 2, 4 seconds
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        raise  # Re-raise after max retries
+                else:
+                    raise  # Not a quota error, raise immediately
 
-        reply = getattr(response, "text", None)
-        if not reply:
-            return jsonify({"error": "Generated response was empty"}), 502
-
-        return jsonify({"reply": reply})
+        return jsonify({"reply": response.text})
 
     except Exception as e:
-        # 3. Specific handling for Quota/Rate Limits
-        if ClientError is not None and isinstance(e, ClientError):
-            # Check for 429 specifically
-            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
-                app.logger.warning("Quota exhausted (429). Informing the user.")
-                return jsonify({
-                    "error": "The AI is currently at maximum capacity for its free tier. Please try again in a few minutes.",
-                    "code": "QUOTA_EXCEEDED"
-                }), 429 # Return 429 instead of 500
+        # 3. The "No-Crash" Safety Net
+        error_msg = str(e)
+        app.logger.error(f"API Error: {error_msg}")
 
-            return jsonify({"error": str(e)}), 400
+        # Handle Quota (429)
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+            return jsonify({"reply": "⚠️ Limit reached! Please wait 15 seconds and try again."}), 200
+        
+        # Handle Google Server Errors (500/503)
+        if "500" in error_msg or "503" in error_msg or "UNAVAILABLE" in error_msg:
+            return jsonify({"reply": "🕒 Google's servers are busy. Let's try again in a moment."}), 200
 
-        app.logger.exception("Internal Server Error")
-        return jsonify({"error": "An unexpected server error occurred."}), 500
+        # Catch-all for any other weird errors
+        return jsonify({"reply": "🔧 Something went wrong, but I'm still here! Try sending that again."}), 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
