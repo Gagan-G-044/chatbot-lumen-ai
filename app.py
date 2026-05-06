@@ -2,32 +2,49 @@ from flask import Flask, request, jsonify, send_from_directory
 import os
 import time
 import traceback
-from dotenv import load_dotenv
+from functools import wraps
 from google import genai
+from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 app = Flask(__name__, static_folder='.')
 
-api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key) if api_key else None
+API_KEY = os.getenv("GEMINI_API_KEY")
 
-# 🔥 MODEL STACK (SAFE + FUTURE PROOF)
 MODELS = [
-    "gemini-2.5-flash",   # latest (if available)
-    "gemini-3.1-flash-lite",   # stable fallback
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash-lite"
 ]
+
+REQUEST_COOLDOWN = 3
+MAX_MESSAGE_LENGTH = 2000
+
+user_last_request = {}
+
+def rate_limit(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        ip = request.remote_addr
+        now = time.time()
+
+        if ip in user_last_request:
+            if now - user_last_request[ip] < REQUEST_COOLDOWN:
+                return jsonify({"reply": "⏳ Wait a few seconds"}), 200
+
+        user_last_request[ip] = now
+        return f(*args, **kwargs)
+
+    return decorated
 
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
 
-
 @app.route('/chat', methods=['POST'])
+@rate_limit
 def chat():
-
-    if not client:
+    if not API_KEY:
         return jsonify({"reply": "❌ Missing API key"}), 200
 
     try:
@@ -37,51 +54,48 @@ def chat():
         if not message:
             return jsonify({"reply": "Say something 🙂"}), 200
 
-        if len(message) > 2000:
-            return jsonify({"reply": "Message too long 🚫"}), 200
+        if len(message) > MAX_MESSAGE_LENGTH:
+            return jsonify({"reply": "Too long 🚫"}), 200
+
+        client = genai.Client(api_key=API_KEY)
 
         response = None
 
-        # 🔁 Try models one by one (smart fallback system)
         for model in MODELS:
-
-            for attempt in range(3):
+            for attempt in range(2):
                 try:
                     response = client.models.generate_content(
                         model=model,
                         contents=message
                     )
-                    break  # success → exit retry loop
+                    break
 
                 except Exception as e:
-                    err = str(e)
+                    err = str(e).lower()
 
-                    # retry only for quota/server issues
-                    if "429" in err or "503" in err or "RESOURCE_EXHAUSTED" in err:
-                        time.sleep(min(4, 2 ** attempt))
+                    if "429" in err or "quota" in err:
+                        time.sleep(3)
                         continue
 
-                    # model not found → try next model
-                    if "404" in err or "NOT_FOUND" in err:
+                    if "404" in err:
                         response = None
                         break
 
                     raise
 
             if response:
-                break  # stop model loop if success
+                break
 
-        # If nothing worked
         if not response:
-            return jsonify({"reply": "⚠️ All models failed. Try again later."}), 200
+            return jsonify({"reply": "⚠️ Server busy. Try again later."}), 200
 
         return jsonify({"reply": response.text}), 200
 
     except Exception:
         app.logger.error(traceback.format_exc())
-        return jsonify({"reply": "🔧 Unexpected error"}), 200
+        return jsonify({"reply": "🔧 Error occurred"}), 200
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port)
