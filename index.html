@@ -633,31 +633,45 @@ body {
   padding: 0 5px; letter-spacing: 0.02em;
 }
 
-/* ── Copy button ── */
+/* ── Copy button — absolute, top-right inside AI bubble ── */
+.bub-ai { padding-right: 46px; } /* reserve space so text never overlaps button */
 .copy-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 9px;
-  background: transparent;
+  position: absolute; top: 8px; right: 10px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px;
+  background: rgba(15,15,30,0.45);
   border: 1px solid var(--glass-border);
   border-radius: var(--r-xs);
-  color: var(--txt-3);
-  font-family: var(--f-ui); font-size: 11px; font-weight: 400;
+  color: var(--txt-2);
+  font-family: var(--f-ui); font-size: 10.5px; font-weight: 400;
   cursor: pointer; letter-spacing: 0.01em;
-  transition: all var(--t) var(--ease);
-  align-self: flex-start;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--t) var(--ease), background var(--t), color var(--t), border-color var(--t);
+  z-index: 2; white-space: nowrap; backdrop-filter: blur(6px);
 }
-.msg-row.user .copy-btn { align-self: flex-end; }
+.bub-ai:hover .copy-btn { opacity: 1; pointer-events: auto; }
 .copy-btn:hover {
-  background: var(--glass-fill);
-  border-color: var(--glass-border-h);
-  color: var(--txt-1);
+  background: rgba(99,102,241,0.18);
+  border-color: rgba(99,102,241,0.3);
+  color: rgba(165,180,252,0.9);
 }
 .copy-btn.copied {
-  color: rgba(110,231,183,0.8);
-  border-color: rgba(52,211,153,0.25);
-  background: rgba(52,211,153,0.06);
+  opacity: 1; pointer-events: auto;
+  color: rgba(110,231,183,0.9);
+  border-color: rgba(52,211,153,0.3);
+  background: rgba(52,211,153,0.1);
 }
-.copy-btn svg { width: 11px; height: 11px; flex-shrink: 0; }
+.copy-btn svg { width: 10px; height: 10px; flex-shrink: 0; }
+/* Light theme copy button adjustment */
+:root[data-theme="light"] .copy-btn {
+  background: rgba(241,245,249,0.88);
+  color: var(--txt-2);
+}
+:root[data-theme="light"] .copy-btn:hover {
+  background: rgba(99,102,241,0.1);
+  border-color: rgba(99,102,241,0.2);
+  color: var(--indigo);
+}
 
 /* ── Markdown content inside AI bubbles ── */
 .bub-ai .md-body { color: var(--txt-0); }
@@ -743,10 +757,11 @@ body {
 
 /* ═══════════════════════════════════════════
    INPUT ZONE
+   CHANGE 1: Reduced padding to lift the box upward slightly
 ═══════════════════════════════════════════ */
 .input-zone {
   position: relative; z-index: 10;
-  padding: 13px 24px 20px;
+  padding: 10px 24px 10px; /* was: 13px 24px 20px */
   background: var(--input-zone-bg);
 }
 .input-inner {
@@ -823,6 +838,52 @@ textarea#inp::placeholder { color: var(--txt-3); }
 }
 
 /* ═══════════════════════════════════════════
+   THEME TOGGLE SLIDER
+═══════════════════════════════════════════ */
+.theme-switch {
+  display: flex; align-items: center;
+  cursor: pointer; position: relative;
+  flex-shrink: 0;
+}
+.theme-switch input[type="checkbox"] { display: none; }
+
+.theme-switch-track {
+  width: 42px; height: 23px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--glass-border);
+  border-radius: 99px;
+  position: relative;
+  transition: background var(--t-lg) var(--ease), border-color var(--t-lg) var(--ease), box-shadow var(--t-lg);
+}
+.theme-switch:hover .theme-switch-track {
+  border-color: var(--glass-border-h);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+.theme-switch input:checked ~ .theme-switch-track {
+  background: rgba(99,102,241,0.18);
+  border-color: rgba(99,102,241,0.35);
+}
+
+.theme-switch-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 17px; height: 17px; border-radius: 50%;
+  background: var(--accent-grad);
+  box-shadow: 0 0 10px var(--accent-glow), 0 1px 3px rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform var(--t-lg) var(--ease), box-shadow var(--t-lg);
+}
+.theme-switch input:checked ~ .theme-switch-track .theme-switch-thumb {
+  transform: translateX(19px);
+  box-shadow: 0 0 14px rgba(251,191,36,0.45), 0 1px 3px rgba(0,0,0,0.2);
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+.theme-switch-thumb svg { width: 9px; height: 9px; color: white; }
+.icon-sun  { display: none;  }
+.icon-moon { display: block; }
+.theme-switch input:checked ~ .theme-switch-track .theme-switch-thumb .icon-sun  { display: block; }
+.theme-switch input:checked ~ .theme-switch-track .theme-switch-thumb .icon-moon { display: none;  }
+
+/* ═══════════════════════════════════════════
    MOBILE
 ═══════════════════════════════════════════ */
 .overlay {
@@ -842,7 +903,7 @@ textarea#inp::placeholder { color: var(--txt-3); }
   .icon-btn.mobile-only { display: flex !important; }
   .topbar { padding: 13px 18px; }
   .messages { padding: 22px 14px 12px; }
-  .input-zone { padding: 12px 14px 18px; }
+  .input-zone { padding: 8px 14px 10px; } /* CHANGE 1 mobile: was 12px 14px 18px */
   .empty { padding: 44px 18px 24px; }
   .empty-h { font-size: 27px; }
   .status span.status-text { display: none; }
@@ -966,12 +1027,21 @@ textarea#inp::placeholder { color: var(--txt-3); }
           <span class="status-dot"></span>
           <span class="status-text">Online</span>
         </div>
-        <button class="icon-btn" id="theme-toggle-btn" title="Switch to light mode" onclick="toggleTheme()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 18a6 6 0 100-12 6 6 0 000 12z"/>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M1 12h2M21 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-          </svg>
-        </button>
+        <!-- CHANGED: theme slider replaces old icon button -->
+        <label class="theme-switch" id="theme-toggle-btn" title="Toggle light / dark">
+          <input type="checkbox" id="theme-checkbox" onchange="toggleTheme()">
+          <span class="theme-switch-track">
+            <span class="theme-switch-thumb">
+              <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
+              </svg>
+              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/>
+              </svg>
+            </span>
+          </span>
+        </label>
         <button class="icon-btn" title="Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
@@ -1128,11 +1198,42 @@ function renderMsg(role, text, isErr = false) {
   bub.className = `bub ${bubClass}`;
   bub.innerHTML = esc(text).replace(/\n/g, '<br>');
 
+  col.appendChild(bub);
+
+  /* ── Copy button — injected INSIDE the AI bubble (top-right) ── */
+  if (!isUser && !isErr) {
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+      </svg>Copy`;
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>Copied!`;
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>Copy`;
+        }, 2000);
+      }).catch(() => { /* clipboard unavailable — silently ignore */ });
+    });
+    bub.appendChild(copyBtn); /* ← inside the bubble, not below it */
+  }
+  /* ─────────────────────────────────────────────────────────────── */
+
   const ts = document.createElement('div');
   ts.className = 'ts';
   ts.textContent = now();
 
-  col.appendChild(bub);
   col.appendChild(ts);
   row.appendChild(av);
   row.appendChild(col);
@@ -1262,10 +1363,9 @@ function applyTheme(theme) {
   root.dataset.theme = theme;
   localStorage.setItem(themeStorageKey, theme);
 
-  const toggle = $('theme-toggle-btn');
-  if (toggle) {
-    toggle.title = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
-  }
+  /* sync slider checkbox — checked = light mode */
+  const cb = document.getElementById('theme-checkbox');
+  if (cb) cb.checked = (theme === 'light');
 }
 
 function toggleTheme() {

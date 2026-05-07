@@ -41,9 +41,17 @@ def rate_limit(f):
 def index():
     return send_from_directory('.', 'index.html')
 
+# ✅ Ping / health route
+@app.route('/health')
+def health():
+    return jsonify({
+        "status": "online"
+    }), 200
+
 @app.route('/chat', methods=['POST'])
 @rate_limit
 def chat():
+
     if not API_KEY:
         return jsonify({"reply": "❌ Missing API key"}), 200
 
@@ -62,40 +70,70 @@ def chat():
         response = None
 
         for model in MODELS:
+
             for attempt in range(2):
+
                 try:
+
                     response = client.models.generate_content(
                         model=model,
                         contents=message
                     )
-                    break
+
+                    if response and response.text:
+                        break
 
                 except Exception as e:
+
                     err = str(e).lower()
 
-                    if "429" in err or "quota" in err:
-                        time.sleep(3)
+                    print("MODEL ERROR:", err)
+
+                    if (
+                        "429" in err
+                        or "quota" in err
+                        or "503" in err
+                        or "unavailable" in err
+                        or "resource_exhausted" in err
+                    ):
+                        time.sleep(2)
                         continue
 
                     if "404" in err:
                         response = None
                         break
 
-                    raise
+                    continue
 
-            if response:
+            if response and response.text:
                 break
 
-        if not response:
-            return jsonify({"reply": "⚠️ Server busy. Try again later."}), 200
+        if not response or not response.text:
+            return jsonify({
+                "reply": "⚠️ Server busy. Try again later."
+            }), 200
 
-        return jsonify({"reply": response.text}), 200
+        return jsonify({
+            "reply": response.text
+        }), 200
 
-    except Exception:
+    except Exception as e:
+
+        print("FINAL ERROR:", str(e))
+
         app.logger.error(traceback.format_exc())
-        return jsonify({"reply": "🔧 Error occurred"}), 200
+
+        return jsonify({
+            "reply": "🔧 Error occurred"
+        }), 200
 
 
 if __name__ == "__main__":
+
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        threaded=True
+    )
