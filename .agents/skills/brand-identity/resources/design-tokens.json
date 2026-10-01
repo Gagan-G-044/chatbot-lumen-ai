@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "brand_name": "Lumen AI",
+    "description": "Core design tokens for UI implementation."
+  },
+  "colors": {
+    "primary": {
+      "DEFAULT": "#6366f1",
+      "hover": "#4f46e5",
+      "foreground": "#ffffff"
+    },
+    "secondary": {
+      "DEFAULT": "#8b5cf6",
+      "hover": "#7c3aed",
+      "foreground": "#ffffff"
+    },
+    "accent": {
+      "DEFAULT": "#a855f7",
+      "start": "#6366f1",
+      "end": "#a855f7",
+      "glow": "rgba(99, 102, 241, 0.22)"
+    },
+    "background": {
+      "dark_base": "#08101b",
+      "dark_depth": "#0f1726",
+      "dark_surface": "rgba(14, 20, 33, 0.9)",
+      "dark_raised": "rgba(18, 24, 38, 0.94)",
+      "light_base": "#f8fafc",
+      "light_depth": "#e2e8f0",
+      "light_surface": "#ffffff"
+    },
+    "text": {
+      "dark_high": "rgba(255, 255, 255, 0.94)",
+      "dark_medium": "rgba(255, 255, 255, 0.68)",
+      "dark_muted": "rgba(255, 255, 255, 0.38)",
+      "light_high": "#0f172a",
+      "light_medium": "#475569",
+      "light_muted": "#94a3b8"
+    },
+    "status": {
+      "success": "#10b981",
+      "destructive": "#ef4444",
+      "info": "#3b82f6"
+    }
+  },
+  "typography": {
+    "font_family_headings": ["Cormorant Garamond", "Palatino Linotype", "Georgia", "serif"],
+    "font_family_body": ["DM Sans", "-apple-system", "BlinkMacSystemFont", "SF Pro Text", "sans-serif"],
+    "font_weight_bold": "700",
+    "font_weight_medium": "500",
+    "font_weight_normal": "400",
+    "font_weight_light": "300"
+  },
+  "ui": {
+    "border_radius_xs": "6px",
+    "border_radius_small": "10px",
+    "border_radius_default": "14px",
+    "border_radius_large": "18px",
+    "border_radius_xl": "22px",
+    "border_radius_full": "30px",
+    "spacing_base_unit": "4px",
+    "glass_blur": "saturate(1.4) blur(18px)",
+    "glass_border": "rgba(255, 255, 255, 0.062)"
+  }
+}

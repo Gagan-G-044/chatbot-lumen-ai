@@ -1,0 +1,89 @@
+/* ═══════════════════════════════════════════════════════════
+   MAGIC UI BORDER BEAM STYLES
+   Perimeter-following illuminated border glow animation
+════════════════════════════════════════════════════════════ */
+
+:root {
+  --beam-size:        240px;
+  --beam-duration:    6s;
+  --beam-width:       1.5px;
+  --beam-color-from:  #38bdf8;       /* Lumen Sky Blue */
+  --beam-color-to:    #0284c7;       /* Lumen Ocean Azure */
+  --beam-glow:        rgba(56, 189, 248, 0.35);
+}
+
+:root[data-theme="light"], html.light {
+  --beam-color-from:  #0284c7;
+  --beam-color-to:    #38bdf8;
+  --beam-glow:        rgba(14, 165, 233, 0.4);
+}
+
+/* Container clipping strictly to the 1-2px border perimeter */
+.border-beam-container {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--border-beam-width, var(--beam-width, 1.5px));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Traveling beam along the container's perimeter */
+.border-beam-line {
+  position: absolute;
+  aspect-ratio: 1;
+  width: var(--border-beam-size, var(--beam-size, 240px));
+  background: linear-gradient(
+    to left,
+    var(--border-beam-color-from, var(--beam-color-from, #38bdf8)),
+    var(--border-beam-color-to, var(--beam-color-to, #0284c7)),
+    transparent
+  );
+  offset-path: rect(0 auto auto 0 round var(--border-beam-size, var(--beam-size, 240px)));
+  animation: border-beam-travel var(--border-beam-duration, var(--beam-duration, 6s)) linear infinite;
+  animation-delay: var(--border-beam-delay, 0s);
+  filter: drop-shadow(0 0 8px var(--border-beam-glow, var(--beam-glow, rgba(56, 189, 248, 0.35))));
+}
+
+.border-beam-line.reverse {
+  animation-direction: reverse;
+}
+
+@keyframes border-beam-travel {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+/* Graceful fallback for browsers without CSS offset-path: rect() */
+@supports not (offset-path: rect(0 auto auto 0 round 10px)) {
+  .border-beam-line {
+    inset: -150%;
+    width: auto;
+    aspect-ratio: auto;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 280deg,
+      var(--border-beam-color-to, var(--beam-color-to, #0284c7)) 325deg,
+      var(--border-beam-color-from, var(--beam-color-from, #38bdf8)) 360deg
+    );
+    animation: border-beam-rotate var(--border-beam-duration, var(--beam-duration, 6s)) linear infinite;
+  }
+  .border-beam-line.reverse {
+    animation-direction: reverse;
+  }
+  @keyframes border-beam-rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
