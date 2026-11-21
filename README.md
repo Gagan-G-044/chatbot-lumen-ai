@@ -125,7 +125,12 @@ Visit **`http://localhost:10000`** in your browser. Verify the backend with the 
 - **Endpoint:** `GET /health`
 - **Response:**
   ```json
-  { "status": "online" }
+  {
+    "status": "online",
+    "service": "lumen-ai",
+    "api_configured": true,
+    "models": ["gemini-2.5-flash", "gemini-3.1-flash-lite"]
+  }
   ```
 
 ### Chat Completion
@@ -133,12 +138,49 @@ Visit **`http://localhost:10000`** in your browser. Verify the backend with the 
 - **Headers:** `Content-Type: application/json`
 - **Body:**
   ```json
-  { "message": "Explain quantum entanglement in simple terms" }
+  {
+    "message": "Explain quantum entanglement in simple terms",
+    "history": [
+      { "role": "user", "content": "Hello!" },
+      { "role": "assistant", "content": "Hello! How can I assist you today?" }
+    ]
+  }
   ```
-- **Response:**
+- **Success Response (HTTP 200):**
   ```json
   { "reply": "Quantum entanglement occurs when..." }
   ```
+- **Error Response (HTTP 400 / 413 / 429 / 503):**
+  ```json
+  {
+    "error": "Detailed error message",
+    "code": "ERROR_CODE"
+  }
+  ```
+
+---
+
+## 🧪 Running Tests
+
+Execute the automated test suite covering endpoints, input validation, conversation memory, rate limiting, and security barriers:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+
+---
+
+## 🚀 Production Deployment (Render)
+
+Lumen AI is fully configured for zero-downtime deployment on Render:
+
+1. **Build Command**: `pip install -r requirements.txt`
+2. **Start Command**: `gunicorn -c gunicorn.conf.py app:app`
+3. **Environment Variables**:
+   - `GEMINI_API_KEY`: Your Google Gemini API key (Required)
+   - `PORT`: Automatically assigned by Render (Defaults to `10000`)
+   - `RATELIMIT_STORAGE_URI`: *(Optional)* Defaults to in-memory (`memory://`). Set to `redis://...` for shared multi-worker rate limiting.
+   - `GEMINI_MODELS`: *(Optional)* Comma-separated model hierarchy (Defaults to `gemini-2.5-flash,gemini-3.1-flash-lite`).
 
 ---
 
