@@ -4,3 +4,7 @@ __pycache__/
 .vscode/
 venv/
 .venv/
+*.log
+.DS_Store
+.pytest_cache/
+tests/__pycache__/
