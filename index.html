@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Lumen — AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
 <script>
 const themeStorageKey = 'lumen-theme';
 
@@ -358,6 +359,7 @@ html.light .orb-2 {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
 }
@@ -372,6 +374,7 @@ html.light .orb-2 {
   align-items: center;
   justify-content: space-between;
   padding: 14px 32px;
+  padding-top: max(14px, env(safe-area-inset-top, 14px));
   background: var(--topbar-bg);
   backdrop-filter: var(--topbar-blur);
   -webkit-backdrop-filter: var(--topbar-blur);
@@ -644,6 +647,7 @@ html.light .theme-switch-track {
   min-width: 0;
   width: 100%;
   height: calc(100vh - 61px);
+  height: calc(100dvh - 61px);
   position: relative;
   background: transparent;
 }
@@ -1035,9 +1039,11 @@ html[data-theme="dark"] .bub-ai .md-body a,
 .input-zone {
   position: relative;
   z-index: 10;
-  padding: 10px 28px 20px;
+  padding: 10px 28px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
   background: transparent;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .input-inner {
@@ -1236,17 +1242,66 @@ border-beam {
 }
 
 /* ═══════════════════════════════════════════
-   RESPONSIVE DESIGN
+   ACCESSIBILITY & FOCUS
+═══════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--sky);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .orb {
+    animation: none !important;
+    opacity: 0.5;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE DESIGN (MOBILE & TABLET)
 ═══════════════════════════════════════════ */
 @media (max-width: 680px) {
-  .topbar { padding: 12px 18px; }
+  .topbar {
+    padding: 10px 16px;
+    padding-top: max(10px, env(safe-area-inset-top, 10px));
+  }
   .brand-sub { display: none; }
   .btn-label { display: none; }
-  .topbar-action-btn { padding: 6px 9px; }
-  .messages { padding: 20px 14px 14px; }
-  .input-zone { padding: 8px 14px 14px; }
-  .empty { padding: 40px 16px 20px; }
-  .empty-h { font-size: 28px; }
+  .topbar-action-btn {
+    padding: 6px 10px;
+    min-height: 38px;
+    min-width: 38px;
+  }
+  .topbar-icon-btn {
+    min-height: 38px;
+    min-width: 38px;
+  }
+  .messages {
+    padding: 18px 12px 14px;
+    gap: 14px;
+  }
+  .bub-col {
+    max-width: 88%;
+  }
+  .input-zone {
+    padding: 6px 12px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  }
+  .input-bar {
+    padding: 8px 8px 8px 14px;
+  }
+  .send {
+    width: 38px;
+    height: 38px;
+  }
+  .empty { padding: 36px 14px 16px; }
+  .empty-h { font-size: 26px; }
+  .empty-gem { width: 50px; height: 50px; }
   .status span.status-text { display: none; }
 }
 </style>
@@ -1331,7 +1386,7 @@ border-beam {
 
     <!-- Scrollable Messages Container -->
     <div class="scroll-area" id="scroll-area">
-      <div class="messages" id="messages">
+      <div class="messages" id="messages" aria-live="polite" aria-atomic="false">
 
         <!-- Initial Empty State -->
         <div class="empty" id="empty-state">
@@ -1483,6 +1538,60 @@ function dismissEmpty() {
   if (el) el.remove();
 }
 
+/* ── DOMPurify Link Configuration ── */
+if (typeof DOMPurify !== 'undefined') {
+  DOMPurify.addHook('afterSanitizeAttributes', function(node) {
+    if (node.tagName === 'A') {
+      node.setAttribute('target', '_blank');
+      node.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
+}
+
+/* ── Clipboard Copy with Fallback ── */
+function copyResponse(text, btn) {
+  const onSuccess = () => {
+    btn.classList.add('copied');
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>Copied!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>Copy`;
+    }, 2000);
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(onSuccess).catch(() => {
+      fallbackCopy(text, onSuccess);
+    });
+  } else {
+    fallbackCopy(text, onSuccess);
+  }
+}
+
+function fallbackCopy(text, onSuccess) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    ta.style.top = '-9999px';
+    ta.setAttribute('readonly', '');
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok && onSuccess) onSuccess();
+  } catch (_) {}
+}
+
 /* ── Message Renderer ── */
 function renderMsg(role, text, isErr = false) {
   dismissEmpty();
@@ -1509,9 +1618,21 @@ function renderMsg(role, text, isErr = false) {
   const bubClass = isUser ? 'bub-user' : (isErr ? 'bub-err' : 'bub-ai');
   bub.className = `bub ${bubClass}`;
 
-  // Render markdown for AI, escaped text for user
+  // Render sanitized markdown for AI, escaped text for user
   if (!isUser && !isErr && typeof marked !== 'undefined') {
-    bub.innerHTML = `<div class="md-body">${marked.parse(text)}</div>`;
+    const rawHtml = marked.parse(text);
+    const cleanHtml = (typeof DOMPurify !== 'undefined')
+      ? DOMPurify.sanitize(rawHtml, {
+          ALLOWED_TAGS: [
+            'p', 'br', 'strong', 'em', 'b', 'i', 'code', 'pre', 'blockquote',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a',
+            'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'span', 'del', 'sup', 'sub'
+          ],
+          ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'title'],
+          ALLOW_DATA_ATTR: false
+        })
+      : esc(text).replace(/\n/g, '<br>');
+    bub.innerHTML = `<div class="md-body">${cleanHtml}</div>`;
   } else {
     bub.innerHTML = esc(text).replace(/\n/g, '<br>');
   }
@@ -1520,28 +1641,14 @@ function renderMsg(role, text, isErr = false) {
   if (!isUser && !isErr) {
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-btn';
+    copyBtn.setAttribute('type', 'button');
+    copyBtn.setAttribute('aria-label', 'Copy response');
     copyBtn.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
         <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
       </svg>Copy`;
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(text).then(() => {
-        copyBtn.classList.add('copied');
-        copyBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>Copied!`;
-        setTimeout(() => {
-          copyBtn.classList.remove('copied');
-          copyBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-            </svg>Copy`;
-        }, 2000);
-      }).catch(() => {});
-    });
+    copyBtn.addEventListener('click', () => copyResponse(text, copyBtn));
     bub.appendChild(copyBtn);
   }
 
@@ -1559,6 +1666,7 @@ function renderMsg(role, text, isErr = false) {
 
 /* ── Typing Indicator ── */
 function showTyping() {
+  if ($('typing')) return;
   const row = document.createElement('div');
   row.id = 'typing';
   row.className = 'typing-row';
@@ -1597,34 +1705,61 @@ async function sendMsg() {
   inpEl.value = '';
   inpEl.style.height = 'auto';
 
+  // Render user message immediately
   renderMsg('user', text);
-  chatHistory.push({ role: 'user', content: text });
 
   setLoading(true);
   showTyping();
 
   try {
+    const payload = {
+      message: text,
+      history: chatHistory.slice(-20)
+    };
+
     const res = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify(payload),
     });
 
-    hideTyping();
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    const data = await res.json();
-    if (!data.reply) throw new Error('Missing "reply" in server response');
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (_) {}
+
+    if (!res.ok) {
+      let errMsg = `Request failed (${res.status})`;
+      if (data && data.error) {
+        errMsg = data.error;
+      } else if (res.status === 429) {
+        errMsg = 'Rate limit exceeded. Please wait a moment.';
+      } else if (res.status === 503) {
+        errMsg = 'AI service temporarily unavailable. Please try again.';
+      }
+      throw new Error(errMsg);
+    }
+
+    if (!data || !data.reply) {
+      throw new Error('Missing reply in server response');
+    }
 
     renderMsg('ai', data.reply);
+
+    // Commit turn to conversation history only on success
+    chatHistory.push({ role: 'user', content: text });
     chatHistory.push({ role: 'assistant', content: data.reply });
+    if (chatHistory.length > 20) {
+      chatHistory = chatHistory.slice(-20);
+    }
 
   } catch(err) {
-    hideTyping();
-    const msg = err.message.includes('fetch')
+    const msg = (err.message && (err.message.includes('fetch') || err.message.includes('Failed to fetch')))
       ? 'Cannot connect to server. Is it running?'
       : err.message;
     renderMsg('ai', '⚠ ' + msg, true);
   } finally {
+    hideTyping();
     setLoading(false);
     inpEl.focus();
   }
@@ -1632,6 +1767,7 @@ async function sendMsg() {
 
 /* ── Suggestion Click ── */
 function suggest(text) {
+  if (busy) return;
   inpEl.value = text;
   inpEl.style.height = 'auto';
   inpEl.style.height = Math.min(inpEl.scrollHeight, 150) + 'px';
@@ -1665,6 +1801,26 @@ function newChat() {
     </div>`;
   msgsEl.appendChild(empty);
   inpEl.focus();
+}
+
+/* ── Viewport & Mobile Keyboard Handling ── */
+if (window.visualViewport) {
+  let pendingScroll = false;
+  const onViewportChange = () => {
+    const appEl = document.querySelector('.app');
+    if (appEl) {
+      appEl.style.height = `${window.visualViewport.height}px`;
+    }
+    if (!pendingScroll) {
+      pendingScroll = true;
+      requestAnimationFrame(() => {
+        scrollBottom();
+        pendingScroll = false;
+      });
+    }
+  };
+  window.visualViewport.addEventListener('resize', onViewportChange);
+  window.visualViewport.addEventListener('scroll', onViewportChange);
 }
 
 /* ── Page Load Initialization ── */
@@ -1830,7 +1986,14 @@ window.addEventListener('DOMContentLoaded', () => {
   resize();
 
   const t0 = performance.now();
+  let animId = null;
+  let isTabVisible = !document.hidden;
+
   function render(now) {
+    if (!isTabVisible) {
+      animId = null;
+      return;
+    }
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -1838,9 +2001,17 @@ window.addEventListener('DOMContentLoaded', () => {
     gl.uniform1f(uLight, lightVal);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-    requestAnimationFrame(render);
+    animId = requestAnimationFrame(render);
   }
-  requestAnimationFrame(render);
+
+  document.addEventListener('visibilitychange', () => {
+    isTabVisible = !document.hidden;
+    if (isTabVisible && !animId) {
+      animId = requestAnimationFrame(render);
+    }
+  });
+
+  animId = requestAnimationFrame(render);
 
   // Observe theme changes on <html>
   const htmlRoot = document.documentElement;
