@@ -1,19 +1,18 @@
 """
 Unit and integration tests for Lumen AI Flask backend.
-Tests health endpoint, homepage, input validation, conversation history,
-rate limiting, security barriers, and mocked Gemini API responses.
+Tests health endpoint, homepage, input validation, rate limiting,
+security barriers, and mocked Gemini API responses.
 """
 
 import unittest
 from unittest.mock import patch, MagicMock
 import os
-import json
 
 # Ensure app is imported in test mode with in-memory limiter
 os.environ["RATELIMIT_STORAGE_URI"] = "memory://"
 os.environ["RATELIMIT_CHAT"] = "5 per minute; 2 per second"
 
-from app import app, limiter, MAX_MESSAGE_LENGTH, MAX_PAYLOAD_BYTES
+from app import app, limiter, MAX_MESSAGE_LENGTH
 
 class LumenAITestCase(unittest.TestCase):
     def setUp(self):
@@ -99,14 +98,6 @@ class LumenAITestCase(unittest.TestCase):
         self.assertEqual(data.get("code"), "MESSAGE_TOO_LONG")
         res.close()
 
-    def test_chat_invalid_history_type_returns_400(self):
-        """Verify that history must be an array."""
-        res = self.client.post("/chat", json={"message": "hello", "history": "not-a-list"})
-        self.assertEqual(res.status_code, 400)
-        data = res.get_json()
-        self.assertEqual(data.get("code"), "INVALID_HISTORY")
-        res.close()
-
     @patch("app.get_genai_client")
     def test_chat_successful_mock_response(self, mock_get_client):
         """Verify that /chat returns 200 and reply when Gemini generates content."""
@@ -117,11 +108,7 @@ class LumenAITestCase(unittest.TestCase):
         mock_get_client.return_value = mock_client
 
         res = self.client.post("/chat", json={
-            "message": "What is the nature of light?",
-            "history": [
-                {"role": "user", "content": "Hello!"},
-                {"role": "assistant", "content": "Greetings traveller."}
-            ]
+            "message": "What is the nature of light?"
         })
         self.assertEqual(res.status_code, 200)
         data = res.get_json()
@@ -163,7 +150,6 @@ class LumenAITestCase(unittest.TestCase):
         mock_get_client.return_value = mock_client
 
         hit_429 = False
-        # Limit is 5 per minute in this test suite setup
         for i in range(10):
             res = self.client.post("/chat", json={"message": f"ping {i}"})
             if res.status_code == 429:

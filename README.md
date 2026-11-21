@@ -139,11 +139,7 @@ Visit **`http://localhost:10000`** in your browser. Verify the backend with the 
 - **Body:**
   ```json
   {
-    "message": "Explain quantum entanglement in simple terms",
-    "history": [
-      { "role": "user", "content": "Hello!" },
-      { "role": "assistant", "content": "Hello! How can I assist you today?" }
-    ]
+    "message": "Explain quantum entanglement in simple terms"
   }
   ```
 - **Success Response (HTTP 200):**
