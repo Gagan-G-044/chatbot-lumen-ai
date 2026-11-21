@@ -1,7 +1,3 @@
-<div align="center">
-
-  <img src="https://raw.githubusercontent.com/Gagan-G-044/chatbot-lumen-ai/main/components/ui/banner.png" alt="Lumen AI Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;" onerror="this.style.display='none'"/>
-
   # ✦ LUMEN AI
   ### The Intelligent, Glassmorphic AI Chat Experience
 
