@@ -8,3 +8,7 @@ venv/
 .DS_Store
 .pytest_cache/
 tests/__pycache__/
+*.png
+*.jpg
+*.jpeg
+scratch/

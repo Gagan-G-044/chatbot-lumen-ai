@@ -24,6 +24,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 from google.genai import errors as genai_errors
 
 # Load environment variables (.env)
@@ -71,7 +72,10 @@ def get_genai_client() -> Optional[genai.Client]:
         return None
     if _client is None:
         try:
-            _client = genai.Client(api_key=api_key)
+            _client = genai.Client(
+                api_key=api_key,
+                http_options=types.HttpOptions(timeout=15000)
+            )
             logger.info("Initialized Google GenAI client.")
         except Exception as e:
             logger.error(f"Failed to initialize GenAI client: {e}")

@@ -4,222 +4,161 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Lumen — AI</title>
+<link rel="icon" type="image/svg+xml" href="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
-<script>
-const themeStorageKey = 'lumen-theme';
-
-function applyTheme(theme) {
-  const root = document.documentElement;
-  const body = document.body;
-
-  root.setAttribute('data-theme', theme);
-  root.style.colorScheme = theme;
-
-  if (theme === 'light') {
-    root.classList.remove('dark');
-    root.classList.add('light');
-    if (body) {
-      body.classList.remove('dark');
-      body.classList.add('light');
-    }
-    root.style.background = 'radial-gradient(130% 90% at 50% -10%, #bae6fd 0%, #e0f2fe 35%, #f0f9ff 70%, #f8fafc 100%) fixed';
-  } else {
-    root.classList.remove('light');
-    root.classList.add('dark');
-    if (body) {
-      body.classList.remove('light');
-      body.classList.add('dark');
-    }
-    root.style.background = 'radial-gradient(130% 90% at 50% -10%, #0e2246 0%, #071224 35%, #030713 70%, #02040a 100%) fixed';
-  }
-
-  try {
-    localStorage.setItem(themeStorageKey, theme);
-  } catch (e) {}
-
-  const cb = document.getElementById('theme-checkbox');
-  if (cb) {
-    cb.checked = (theme === 'light');
-  }
-}
-
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
-  applyTheme(current === 'light' ? 'dark' : 'light');
-}
-
-function initTheme() {
-  let saved = null;
-  try {
-    saved = localStorage.getItem(themeStorageKey);
-  } catch (e) {}
-  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-  const initialTheme = saved ? saved : (prefersLight ? 'light' : 'dark');
-  applyTheme(initialTheme);
-}
-
-// Apply immediately on parse to avoid flash
-initTheme();
-</script>
 <style>
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS & SURFACES
+   DESIGN TOKENS & SYSTEM VARIABLES
 ═══════════════════════════════════════════ */
 :root {
-  /* Core Sky Palette */
-  --sky:            #38bdf8;
-  --sky-mid:        #0ea5e9;
-  --sky-deep:       #0284c7;
-  --sky-glow:       rgba(56, 189, 248, 0.26);
-  --sky-glow2:      rgba(14, 165, 233, 0.14);
-  --accent-grad:    linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
-  --accent-glow:    rgba(56, 189, 248, 0.28);
-  --accent-glow2:   rgba(14, 165, 233, 0.16);
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif;
 
-  /* Border Beam Tokens */
-  --beam-size:        240px;
-  --beam-duration:    6s;
-  --beam-width:       1.5px;
-  --beam-color-from:  var(--sky, #38bdf8);
-  --beam-color-to:    var(--sky-deep, #0284c7);
-  --beam-glow:        rgba(56, 189, 248, 0.35);
+  /* Lavender & Violet Palette */
+  --lavender-50:  #FAF8FF;
+  --lavender-100: #F3EEFE;
+  --lavender-200: #E9E1FD;
+  --lavender-300: #D8CBFB;
+  --lavender-400: #BAA3F8;
+  --lavender-500: #9D85F2;
+  --lavender-600: #8262E9;
+  --lavender-700: #6B46D9;
+  --lavender-800: #5733B8;
 
-  /* Typography */
-  --f-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
-  --f-ui:      'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  --orb-gradient: radial-gradient(circle at 35% 30%, #E9E1FD 0%, #BAA3F8 32%, #8262E9 68%, #5733B8 100%);
+  --orb-shadow: 0 16px 50px -8px rgba(130, 98, 233, 0.42), 0 0 80px 10px rgba(157, 133, 242, 0.28);
 
-  /* Radii */
-  --r-xs:  6px;
-  --r-sm:  10px;
-  --r-md:  14px;
-  --r-lg:  18px;
-  --r-xl:  22px;
-  --r-2xl: 30px;
+  --chat-max-width: 780px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
 
-  /* Layout */
-  --chat-max: 860px;
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-fast: 160ms;
+  --t-normal: 260ms;
+}
 
-  /* Motion */
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --t:    180ms;
-  --t-lg: 320ms;
+/* ── LIGHT THEME VARIABLES ── */
+.theme-light, [data-theme="light"] {
+  --bg-main: #FBFBFE;
+  --bg-gradient: radial-gradient(120% 90% at 50% -10%, #F3EEFE 0%, #F8F6FF 40%, #FAF9FE 75%, #FBFBFE 100%);
+  --header-bg: rgba(251, 251, 254, 0.85);
+  --header-blur: blur(20px) saturate(1.3);
+  --header-border: rgba(130, 98, 233, 0.08);
 
-  /* Dark Theme Surfaces (Default) */
-  --bg-gradient: radial-gradient(130% 90% at 50% -10%, #0e2246 0%, #071224 35%, #030713 70%, #02040a 100%);
-  --topbar-bg:   rgba(6, 12, 24, 0.55);
-  --topbar-blur: blur(20px) saturate(1.4);
-  --stroke:      rgba(255, 255, 255, 0.08);
-  --stroke-h:    rgba(255, 255, 255, 0.16);
-  --stroke-acc:  rgba(56, 189, 248, 0.4);
+  --surface-card: #FFFFFF;
+  --surface-card-hover: #FFFFFF;
+  --border-card: rgba(130, 98, 233, 0.10);
+  --border-card-hover: rgba(130, 98, 233, 0.28);
+  --shadow-card: 0 4px 20px -2px rgba(130, 98, 233, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-card-hover: 0 12px 32px -4px rgba(130, 98, 233, 0.14), 0 2px 6px rgba(0, 0, 0, 0.04);
 
-  --txt-0: rgba(255, 255, 255, 0.95);
-  --txt-1: rgba(255, 255, 255, 0.72);
-  --txt-2: rgba(255, 255, 255, 0.45);
-  --txt-3: rgba(255, 255, 255, 0.25);
+  --txt-primary: #191624;
+  --txt-secondary: #686478;
+  --txt-tertiary: #9E9AAE;
+  --txt-accent: #8262E9;
 
-  --input-bar-bg:      rgba(11, 18, 32, 0.78);
-  --input-bar-border:  rgba(255, 255, 255, 0.09);
-  --input-bar-focus:   rgba(56, 189, 248, 0.5);
+  --composer-bg: #FFFFFF;
+  --composer-border: rgba(130, 98, 233, 0.16);
+  --composer-shadow: 0 8px 32px -4px rgba(130, 98, 233, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --composer-focus-border: rgba(130, 98, 233, 0.65);
+  --composer-focus-shadow: 0 0 0 2px rgba(130, 98, 233, 0.2), 0 12px 36px -4px rgba(130, 98, 233, 0.18);
 
-  --bub-ai-bg:         rgba(13, 20, 35, 0.72);
-  --bub-ai-border:     rgba(255, 255, 255, 0.08);
-  --bub-ai-color:      rgba(255, 255, 255, 0.95);
+  --btn-icon-bg: rgba(130, 98, 233, 0.06);
+  --btn-icon-border: rgba(130, 98, 233, 0.12);
+  --btn-icon-color: #554F68;
+  --btn-icon-hover-bg: rgba(130, 98, 233, 0.12);
+  --btn-icon-hover-color: #191624;
 
-  --bub-err-bg:        rgba(239, 68, 68, 0.09);
-  --bub-err-border:    rgba(239, 68, 68, 0.25);
-  --bub-err-color:     rgba(252, 165, 165, 0.95);
+  --btn-purple-bg: linear-gradient(135deg, #9D85F2 0%, #8262E9 100%);
+  --btn-purple-txt: #FFFFFF;
+  --btn-purple-hover: linear-gradient(135deg, #AA94F5 0%, #8F70ED 100%);
+  --btn-purple-shadow: 0 6px 20px -2px rgba(130, 98, 233, 0.38);
+  --orb-ambient-glow: radial-gradient(circle, rgba(186, 163, 248, 0.45) 0%, rgba(130, 98, 233, 0.15) 50%, transparent 70%);
 
-  --chip-bg:           rgba(255, 255, 255, 0.045);
-  --chip-border:       rgba(255, 255, 255, 0.08);
-  --chip-color:        rgba(255, 255, 255, 0.75);
-  --chip-hover-bg:     rgba(56, 189, 248, 0.12);
-  --chip-hover-border: rgba(56, 189, 248, 0.35);
-  --chip-hover-color:  rgba(186, 230, 253, 0.98);
+  --user-bub-bg: linear-gradient(135deg, #9D85F2 0%, #8262E9 100%);
+  --user-bub-txt: #FFFFFF;
+  --user-bub-shadow: 0 4px 18px rgba(130, 98, 233, 0.28);
 
-  --status-bg:         rgba(52, 211, 153, 0.08);
-  --status-border:     rgba(52, 211, 153, 0.22);
-  --status-color:      rgba(110, 231, 183, 0.92);
+  --ai-bub-bg: #FFFFFF;
+  --ai-bub-border: rgba(130, 98, 233, 0.12);
+  --ai-bub-txt: #191624;
+  --ai-bub-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 
-  --btn-topbar-bg:           rgba(255, 255, 255, 0.045);
-  --btn-topbar-border:       rgba(255, 255, 255, 0.09);
-  --btn-topbar-color:        rgba(255, 255, 255, 0.75);
-  --btn-topbar-hover-bg:     rgba(56, 189, 248, 0.12);
-  --btn-topbar-hover-border: rgba(56, 189, 248, 0.32);
-  --btn-topbar-hover-color:  rgba(255, 255, 255, 0.95);
+  --code-bg: #151124;
+  --code-border: rgba(255, 255, 255, 0.1);
+  --code-txt: #F3EEFE;
+  --inline-code-bg: rgba(130, 98, 233, 0.08);
+  --inline-code-border: rgba(130, 98, 233, 0.18);
+  --inline-code-txt: #6B46D9;
+}
 
-  --code-bg:           rgba(5, 10, 20, 0.72);
-  --code-border:       rgba(255, 255, 255, 0.09);
-  --code-color:        #e2e8f0;
-  --inline-code-bg:    rgba(56, 189, 248, 0.09);
-  --inline-code-border:rgba(56, 189, 248, 0.2);
-  --inline-code-color: rgba(186, 230, 253, 0.95);
+/* ── DARK THEME VARIABLES (PITCH BLACK OLED / ZERO PURPLE) ── */
+.theme-dark, [data-theme="dark"] {
+  --bg-main: #000000;
+  --bg-gradient: #000000;
+  --header-bg: rgba(0, 0, 0, 0.92);
+  --header-blur: blur(20px);
+  --header-border: rgba(255, 255, 255, 0.10);
+
+  --surface-card: #0A0A0A;
+  --surface-card-hover: #141414;
+  --border-card: rgba(255, 255, 255, 0.12);
+  --border-card-hover: rgba(255, 255, 255, 0.35);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.95);
+  --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 1);
+
+  --txt-primary: #FFFFFF;
+  --txt-secondary: #A1A1AA;
+  --txt-tertiary: #71717A;
+  --txt-accent: #FFFFFF;
+
+  --composer-bg: #0A0A0A;
+  --composer-border: rgba(255, 255, 255, 0.16);
+  --composer-shadow: 0 8px 32px rgba(0, 0, 0, 0.95);
+  --composer-focus-border: #FFFFFF;
+  --composer-focus-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2), 0 12px 36px rgba(0, 0, 0, 1);
+
+  --btn-icon-bg: rgba(255, 255, 255, 0.08);
+  --btn-icon-border: rgba(255, 255, 255, 0.14);
+  --btn-icon-color: #F4F4F5;
+  --btn-icon-hover-bg: rgba(255, 255, 255, 0.18);
+  --btn-icon-hover-color: #FFFFFF;
+
+  --btn-purple-bg: #FFFFFF;
+  --btn-purple-txt: #000000;
+  --btn-purple-hover: #E4E4E7;
+  --btn-purple-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+
+  --user-bub-bg: #FFFFFF;
+  --user-bub-txt: #000000;
+  --user-bub-shadow: 0 4px 20px rgba(255, 255, 255, 0.10);
+
+  --ai-bub-bg: #0D0D0D;
+  --ai-bub-border: rgba(255, 255, 255, 0.14);
+  --ai-bub-txt: #FFFFFF;
+  --ai-bub-shadow: 0 4px 28px rgba(0, 0, 0, 0.9);
+
+  --code-bg: #050505;
+  --code-border: rgba(255, 255, 255, 0.14);
+  --code-txt: #F4F4F5;
+  --inline-code-bg: rgba(255, 255, 255, 0.12);
+  --inline-code-border: rgba(255, 255, 255, 0.20);
+  --inline-code-txt: #FFFFFF;
+
+  --orb-ambient-glow: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.04) 50%, transparent 70%);
+  --orb-shadow: 0 16px 50px -8px rgba(0, 0, 0, 0.9), 0 0 50px 4px rgba(255, 255, 255, 0.12);
 }
 
 /* ═══════════════════════════════════════════
-   LIGHT THEME (HIGH CONTRAST & HARMONIOUS)
-═══════════════════════════════════════════ */
-:root[data-theme="light"], html.light, html[data-theme="light"] {
-  --bg-gradient: radial-gradient(130% 90% at 50% -10%, #bae6fd 0%, #e0f2fe 35%, #f0f9ff 70%, #f8fafc 100%);
-  --topbar-bg:   rgba(240, 249, 255, 0.75);
-  --topbar-blur: blur(20px) saturate(1.4);
-  --stroke:      rgba(14, 165, 233, 0.15);
-  --stroke-h:    rgba(14, 165, 233, 0.28);
-  --stroke-acc:  rgba(14, 165, 233, 0.45);
-
-  --txt-0: #0a192f;
-  --txt-1: #1e3a5f;
-  --txt-2: #334155;
-  --txt-3: #64748b;
-
-  --input-bar-bg:      rgba(255, 255, 255, 0.90);
-  --input-bar-border:  rgba(14, 165, 233, 0.24);
-  --input-bar-focus:   rgba(14, 165, 233, 0.65);
-
-  --bub-ai-bg:         rgba(255, 255, 255, 0.92);
-  --bub-ai-border:     rgba(14, 165, 233, 0.2);
-  --bub-ai-color:      #0a192f;
-
-  --bub-err-bg:        rgba(239, 68, 68, 0.08);
-  --bub-err-border:    rgba(239, 68, 68, 0.22);
-  --bub-err-color:     #b91c1c;
-
-  --chip-bg:           rgba(255, 255, 255, 0.78);
-  --chip-border:       rgba(14, 165, 233, 0.22);
-  --chip-color:        #1e3a5f;
-  --chip-hover-bg:     rgba(255, 255, 255, 0.98);
-  --chip-hover-border: rgba(14, 165, 233, 0.48);
-  --chip-hover-color:  #0284c7;
-
-  --status-bg:         rgba(16, 185, 129, 0.1);
-  --status-border:     rgba(16, 185, 129, 0.25);
-  --status-color:      #047857;
-
-  --btn-topbar-bg:           rgba(255, 255, 255, 0.75);
-  --btn-topbar-border:       rgba(14, 165, 233, 0.22);
-  --btn-topbar-color:        #0c1a2e;
-  --btn-topbar-hover-bg:     rgba(255, 255, 255, 0.98);
-  --btn-topbar-hover-border: rgba(14, 165, 233, 0.45);
-  --btn-topbar-hover-color:  #0284c7;
-
-  --code-bg:           #0f172a;
-  --code-border:       rgba(14, 165, 233, 0.16);
-  --code-color:        #f8fafc;
-  --inline-code-bg:    rgba(14, 165, 233, 0.1);
-  --inline-code-border:rgba(14, 165, 233, 0.24);
-  --inline-code-color: #0284c7;
-
-  /* Border Beam Light Tokens */
-  --beam-color-from:  #0284c7;
-  --beam-color-to:    #38bdf8;
-  --beam-glow:        rgba(14, 165, 233, 0.4);
-}
-
-/* ═══════════════════════════════════════════
-   RESET & FULL VIEWPORT ROOT
+   RESET & FOUNDATIONS
 ═══════════════════════════════════════════ */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -227,1082 +166,1101 @@ initTheme();
   padding: 0;
 }
 
-html {
+html, body {
   height: 100%;
   width: 100%;
-  color-scheme: dark;
-  background: var(--bg-gradient);
-  background-attachment: fixed;
-  transition: background 300ms ease;
-}
-
-html[data-theme="light"], html.light {
-  color-scheme: light;
-}
-
-body {
-  height: 100%;
-  width: 100%;
-  font-family: var(--f-ui);
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--txt-0);
-  background: transparent;
   overflow: hidden;
+  background-color: var(--bg-main, #000000);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: color var(--t);
+}
+
+[data-theme="dark"] body {
+  background-color: #000000;
 }
 
 /* ═══════════════════════════════════════════
-   SCROLLBAR
+   DUAL-LAYER ARCHITECTURE FOR REVERSIBLE INK MASK
 ═══════════════════════════════════════════ */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.18); border-radius: 99px; transition: background var(--t); }
-::-webkit-scrollbar-thumb:hover { background: rgba(56,189,248,0.45); }
-
-/* ═══════════════════════════════════════════
-   FULL-SCREEN TOPO WEBGL & AMBIENT GLOW
-═══════════════════════════════════════════ */
-#topo-bg {
-  position: fixed;
-  inset: 0;
+.app-viewport {
+  position: relative;
   width: 100vw;
   height: 100vh;
-  pointer-events: none;
-  z-index: 0;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-#topo-canvas {
+/* BASE LAYER (LIGHT THEME) */
+.layer-light {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: var(--bg-gradient);
+  background-color: var(--bg-main);
+  color: var(--txt-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* OVERLAY LAYER (DARK THEME - CLIPPED VIA LIQUID SVG MASK) */
+.layer-dark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  background: var(--bg-gradient);
+  background-color: var(--bg-main);
+  color: var(--txt-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  -webkit-mask: url(#ink-mask);
+  mask: url(#ink-mask);
+  pointer-events: none; /* Controlled dynamically by timeline progress */
+}
+
+/* SVG MASK DEFINITION */
+#svg-mask-layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* ═══════════════════════════════════════════
+   AMBIENT TOPOGRAPHIC FIELD (BACKGROUND)
+═══════════════════════════════════════════ */
+.topo-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.65;
+}
+
+.topo-canvas {
   width: 100%;
   height: 100%;
   display: block;
 }
 
-/* Dark mode soft radial vignette for depth */
-#topo-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 95% 85% at 50% 40%, transparent 40%, rgba(2, 5, 12, 0.45) 100%);
-  pointer-events: none;
-  transition: opacity 300ms ease;
-}
-
-html[data-theme="light"] #topo-bg::after,
-html.light #topo-bg::after {
-  opacity: 0;
-}
-
-/* Ambient glow orbs */
-.ambient {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(140px);
-  pointer-events: none;
-}
-
-.orb-1 {
-  width: 800px;
-  height: 800px;
-  top: -240px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
-  animation: orbFloat1 26s ease-in-out infinite alternate;
-}
-
-.orb-2 {
-  width: 500px;
-  height: 500px;
-  bottom: -120px;
-  right: -60px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.16), transparent 70%);
-  animation: orbFloat2 32s ease-in-out infinite alternate;
-}
-
-html[data-theme="light"] .orb-1,
-html.light .orb-1 {
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.15), transparent 70%);
-}
-
-html[data-theme="light"] .orb-2,
-html.light .orb-2 {
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.12), transparent 70%);
-}
-
-@keyframes orbFloat1 {
-  from { transform: translate(-50%, 0) scale(1); }
-  to   { transform: translate(calc(-50% - 50px), 60px) scale(1.12); }
-}
-
-@keyframes orbFloat2 {
-  from { transform: translate(0, 0) scale(1); }
-  to   { transform: translate(40px, -60px) scale(1.16); }
-}
-
 /* ═══════════════════════════════════════════
-   FULL-WIDTH APP SHELL (NO DEAD GUTTERS)
+   HEADER / TOPBAR
 ═══════════════════════════════════════════ */
-.app {
+.header {
   position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
-  width: 100vw;
-  overflow: hidden;
-}
-
-/* ═══════════════════════════════════════════
-   SEAMLESS TOPBAR (FULL WIDTH HEADER)
-═══════════════════════════════════════════ */
-.topbar {
-  position: relative;
-  z-index: 10;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 32px;
-  padding-top: max(14px, env(safe-area-inset-top, 14px));
-  background: var(--topbar-bg);
-  backdrop-filter: var(--topbar-blur);
-  -webkit-backdrop-filter: var(--topbar-blur);
-  border-bottom: 1px solid var(--stroke);
-  transition: background var(--t-lg), border-color var(--t-lg);
+  padding: 12px 24px;
+  padding-top: max(12px, env(safe-area-inset-top, 12px));
+  background: var(--header-bg);
+  backdrop-filter: var(--header-blur);
+  -webkit-backdrop-filter: var(--header-blur);
+  border-bottom: 1px solid var(--header-border);
+  flex-shrink: 0;
 }
 
-.brand {
+.user-profile {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  cursor: pointer;
   user-select: none;
   text-decoration: none;
+  min-width: 0;
+  flex: 1;
 }
 
-.logo-gem {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--accent-grad);
-  box-shadow: 0 0 16px var(--accent-glow), 0 0 32px var(--accent-glow2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.user-avatar-wrap {
   position: relative;
-  overflow: hidden;
-}
-
-.logo-gem::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, transparent 60%);
-}
-
-.logo-gem svg {
-  width: 15px;
-  height: 15px;
-  color: #ffffff;
-  position: relative;
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.brand-title-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.brand-name {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.3px;
-  color: var(--txt-0);
-}
-
-.brand-badge {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  color: var(--sky-deep);
-}
-
-html[data-theme="dark"] .brand-badge,
-:root:not([data-theme="light"]) .brand-badge {
-  color: #7dd3fc;
-}
-
-.brand-sub {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 11px;
-  font-weight: 300;
-  color: var(--txt-2);
-  letter-spacing: 0.02em;
-  margin-top: 1px;
-}
-
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Action button (e.g. New chat) */
-.topbar-action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 13px;
-  background: var(--btn-topbar-bg);
-  border: 1px solid var(--btn-topbar-border);
-  border-radius: var(--r-md);
-  color: var(--btn-topbar-color);
-  font-family: var(--f-ui);
-  font-size: 12.5px;
-  font-weight: 500;
-  cursor: pointer;
-  letter-spacing: -0.1px;
-  transition: all var(--t) var(--ease);
-}
-
-.topbar-action-btn:hover {
-  background: var(--btn-topbar-hover-bg);
-  border-color: var(--btn-topbar-hover-border);
-  color: var(--btn-topbar-hover-color);
-  box-shadow: 0 0 16px var(--accent-glow);
-  transform: translateY(-1px);
-}
-
-.topbar-action-btn svg {
-  width: 14px;
-  height: 14px;
   flex-shrink: 0;
 }
 
-/* Icon button (e.g. Clear) */
-.topbar-icon-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-sm);
-  background: var(--btn-topbar-bg);
-  border: 1px solid var(--btn-topbar-border);
-  color: var(--txt-2);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--t) var(--ease);
-}
-
-.topbar-icon-btn:hover {
-  background: var(--btn-topbar-hover-bg);
-  border-color: var(--btn-topbar-hover-border);
-  color: var(--txt-0);
-  box-shadow: 0 0 12px var(--accent-glow);
-}
-
-.topbar-icon-btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-.topbar-divider {
-  width: 1px;
-  height: 18px;
-  background: var(--stroke);
-}
-
-/* Online Status Pill */
-.status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 11px;
-  background: var(--status-bg);
-  border: 1px solid var(--status-border);
-  border-radius: 99px;
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--status-color);
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
+.user-avatar {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
-  animation: statusPulse 2.4s ease-in-out infinite;
-}
-
-@keyframes statusPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.4; transform: scale(0.8); }
-}
-
-/* ═══════════════════════════════════════════
-   THEME TOGGLE SLIDER
-═══════════════════════════════════════════ */
-.theme-switch {
-  display: inline-flex;
+  background: linear-gradient(135deg, #BAA3F8 0%, #8262E9 100%);
+  display: flex;
   align-items: center;
-  cursor: pointer;
-  position: relative;
-  user-select: none;
+  justify-content: center;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 13.5px;
+  box-shadow: 0 2px 10px rgba(130, 98, 233, 0.28);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-.theme-switch input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-.theme-switch-track {
-  width: 46px;
-  height: 25px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--stroke-h);
-  border-radius: 99px;
-  position: relative;
-  transition: background var(--t-lg) var(--ease), border-color var(--t-lg) var(--ease), box-shadow var(--t-lg);
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
-html[data-theme="light"] .theme-switch-track,
-html.light .theme-switch-track {
-  background: rgba(14, 165, 233, 0.16);
-  border-color: rgba(14, 165, 233, 0.38);
-}
-
-.theme-switch:hover .theme-switch-track {
-  border-color: var(--sky);
-  box-shadow: 0 0 12px var(--accent-glow);
-}
-
-.theme-switch-thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 19px;
-  height: 19px;
+.msg-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
   border-radius: 50%;
-  background: var(--accent-grad);
-  box-shadow: 0 0 10px var(--accent-glow), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.user-status-dot {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #10B981;
+  border: 1.5px solid var(--bg-main);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.user-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--txt-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  font-size: 11px;
+  color: var(--txt-secondary);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.header-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--btn-icon-bg);
+  border: 1px solid var(--btn-icon-border);
+  color: var(--btn-icon-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform var(--t-lg) var(--ease), background var(--t-lg) var(--ease), box-shadow var(--t-lg);
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-spring);
+  position: relative;
+  flex-shrink: 0;
+  pointer-events: auto !important; /* Always clickable even during theme transition */
 }
 
-/* Checked state = Light mode */
-.theme-switch input:checked ~ .theme-switch-track .theme-switch-thumb {
-  transform: translateX(21px);
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.5), 0 1px 3px rgba(0, 0, 0, 0.18);
-  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+.header-btn:hover {
+  background: var(--btn-icon-hover-bg);
+  color: var(--btn-icon-hover-color);
+  transform: translateY(-1px);
+  border-color: rgba(157, 133, 242, 0.35);
 }
 
-.theme-switch-thumb svg {
-  width: 10px;
-  height: 10px;
-  color: #ffffff;
+.header-btn:active {
+  transform: scale(0.95);
 }
 
-.icon-sun  { display: none; }
-.icon-moon { display: block; }
-
-.theme-switch input:checked ~ .theme-switch-track .theme-switch-thumb .icon-sun  { display: block; }
-.theme-switch input:checked ~ .theme-switch-track .theme-switch-thumb .icon-moon { display: none; }
+.header-btn svg {
+  width: 16px;
+  height: 16px;
+}
 
 /* ═══════════════════════════════════════════
-   MAIN CHAT CONTAINER (FULL-WIDTH EXPANSION)
+   MAIN STAGE (SCROLLABLE AREA)
 ═══════════════════════════════════════════ */
-.main {
+.stage {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   width: 100%;
-  height: calc(100vh - 61px);
-  height: calc(100dvh - 61px);
-  position: relative;
-  background: transparent;
-}
-
-.scroll-area {
-  flex: 1;
   overflow-y: auto;
   position: relative;
-  z-index: 1;
-  width: 100%;
+  z-index: 10;
 }
 
-.messages {
-  max-width: var(--chat-max);
+.stage-inner {
+  max-width: var(--chat-max-width);
+  width: 100%;
   margin: 0 auto;
-  padding: 36px 28px 24px;
+  padding: 24px 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  width: 100%;
+  flex: 1;
 }
 
-/* ── Empty State ── */
-.empty {
+/* ═══════════════════════════════════════════
+   HOME SCREEN (MATCHING REFERENCE IMAGE PHONE 1)
+═══════════════════════════════════════════ */
+.home-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 68px 24px 32px;
-  animation: fadeUp 0.8s var(--ease) both;
+  margin: auto 0;
+  padding: 10px 0;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.empty-gem {
-  width: 60px;
-  height: 60px;
-  border-radius: 18px;
-  background: var(--accent-grad);
-  box-shadow: 0 0 32px var(--accent-glow), 0 0 64px var(--accent-glow2),
-              0 1px 0 rgba(255,255,255,0.2) inset;
+/* ── ANIMATED LAVENDER AI ORB ── */
+.ai-orb-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 26px;
+  cursor: pointer;
+}
+
+.ai-orb-glow {
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  background: var(--orb-ambient-glow, radial-gradient(circle, rgba(186, 163, 248, 0.45) 0%, rgba(130, 98, 233, 0.15) 50%, transparent 70%));
+  filter: blur(24px);
+  animation: orbGlowPulse 4s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.ai-orb {
+  width: 82px;
+  height: 82px;
+  border-radius: 54% 46% 42% 58% / 58% 44% 56% 42%;
+  background: var(--orb-gradient);
+  box-shadow: var(--orb-shadow);
+  animation: orbFloat 5s ease-in-out infinite, orbMorph 7s ease-in-out infinite alternate;
   position: relative;
   overflow: hidden;
+  transition: transform var(--t-fast) var(--ease-spring);
 }
 
-.empty-gem::before {
+.ai-orb:hover {
+  transform: scale(1.08);
+}
+
+.ai-orb::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(145deg, rgba(255,255,255,0.25) 0%, transparent 60%);
+  top: 8%;
+  left: 14%;
+  width: 35%;
+  height: 35%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 70%);
+  filter: blur(3px);
+  transform: rotate(-25deg);
 }
 
-.empty-gem svg {
-  width: 28px;
-  height: 28px;
-  color: #ffffff;
-  position: relative;
+.ai-orb::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  right: 12%;
+  width: 45%;
+  height: 45%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(216, 203, 251, 0.4) 0%, transparent 70%);
+  filter: blur(6px);
 }
 
-.empty-h {
-  font-family: var(--f-display);
-  font-size: 38px;
-  font-weight: 400;
-  letter-spacing: -0.4px;
-  line-height: 1.15;
-  color: var(--txt-0);
-  margin-bottom: 12px;
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-7px); }
 }
 
-.empty-h em {
-  font-style: italic;
-  background: linear-gradient(100deg, #38bdf8 0%, #0284c7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@keyframes orbMorph {
+  0%   { border-radius: 54% 46% 42% 58% / 58% 44% 56% 42%; }
+  33%  { border-radius: 44% 56% 58% 42% / 46% 58% 42% 54%; }
+  66%  { border-radius: 58% 42% 46% 54% / 42% 54% 58% 46%; }
+  100% { border-radius: 46% 54% 54% 46% / 54% 42% 46% 58%; }
 }
 
-html[data-theme="light"] .empty-h em,
-html.light .empty-h em {
-  background: linear-gradient(100deg, #0284c7 0%, #0369a1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@keyframes orbGlowPulse {
+  0%   { opacity: 0.6; transform: scale(0.95); }
+  100% { opacity: 1.0; transform: scale(1.15); }
 }
 
-.empty-p {
-  font-size: 14.5px;
-  color: var(--txt-2);
-  max-width: 400px;
-  line-height: 1.68;
-  font-weight: 300;
+/* ── GREETING TYPOGRAPHY ── */
+.greeting-pre {
+  font-family: var(--font-heading);
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--txt-accent);
+  margin-bottom: 5px;
+  letter-spacing: -0.2px;
 }
 
-.chips {
+.greeting-main {
+  font-family: var(--font-heading);
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: var(--txt-primary);
+  line-height: 1.25;
+  margin-bottom: 26px;
+}
+
+/* ── 2x2 SUGGESTION CARDS GRID ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 620px;
+  margin-bottom: 16px;
+}
+
+.s-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  text-align: left;
   display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-  justify-content: center;
-  margin-top: 30px;
-  max-width: 720px;
-}
-
-.chip {
-  padding: 8px 16px;
-  background: var(--chip-bg);
-  border: 1px solid var(--chip-border);
-  border-radius: 99px;
-  font-size: 12.5px;
-  color: var(--chip-color);
+  flex-direction: column;
+  gap: 6px;
   cursor: pointer;
-  font-weight: 400;
-  letter-spacing: -0.1px;
-  transition: all var(--t) var(--ease);
-  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-card);
+  transition: all var(--t-normal) var(--ease-spring);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  min-width: 0;
 }
 
-.chip:hover {
-  background: var(--chip-hover-bg);
-  border-color: var(--chip-hover-border);
-  color: var(--chip-hover-color);
+.s-card:hover {
+  background: var(--surface-card-hover);
+  border-color: var(--border-card-hover);
+  box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.16);
 }
 
-/* ── Message Rows ── */
+.s-card:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.s-card-icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--txt-secondary);
+  transition: color var(--t-fast);
+  margin-bottom: 2px;
+}
+
+.s-card:hover .s-card-icon {
+  color: var(--txt-accent);
+}
+
+.s-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.s-card-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--txt-primary);
+  letter-spacing: -0.2px;
+  line-height: 1.25;
+}
+
+.s-card-desc {
+  font-size: 11.5px;
+  color: var(--txt-secondary);
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════
+   CONVERSATION MESSAGES VIEW
+═══════════════════════════════════════════ */
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding-bottom: 12px;
+}
+
 .msg-row {
   display: flex;
   gap: 12px;
   align-items: flex-end;
-  animation: msgIn 0.35s var(--ease) both;
+  animation: msgEntrance 0.35s var(--ease-spring) both;
 }
 
 .msg-row.user {
   flex-direction: row-reverse;
 }
 
-@keyframes msgIn {
-  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+@keyframes msgEntrance {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.av {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  flex-shrink: 0;
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
-.av-ai {
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  color: var(--sky-deep);
+.msg-avatar.ai {
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 2px 8px rgba(130, 98, 233, 0.15);
+  color: var(--txt-accent);
 }
 
-html[data-theme="dark"] .av-ai,
-:root:not([data-theme="light"]) .av-ai {
-  color: #38bdf8;
+.msg-avatar.user {
+  background: linear-gradient(135deg, #BAA3F8 0%, #8262E9 100%);
+  color: #FFFFFF;
+  box-shadow: 0 2px 10px rgba(130, 98, 233, 0.28);
 }
 
-.av-ai svg { width: 14px; height: 14px; }
-
-.av-user {
-  background: var(--accent-grad);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  box-shadow: 0 0 14px var(--accent-glow);
-}
-
-.bub-col {
+.msg-bubble-wrap {
   display: flex;
   flex-direction: column;
-  max-width: min(80%, 640px);
+  max-width: min(82%, 620px);
   gap: 4px;
 }
 
-.msg-row.user .bub-col {
+.msg-row.user .msg-bubble-wrap {
   align-items: flex-end;
 }
 
-.bub {
-  padding: 12px 18px;
-  border-radius: var(--r-xl);
-  font-size: 14px;
-  line-height: 1.66;
+.msg-bubble {
+  padding: 13px 18px;
+  border-radius: var(--radius-lg);
+  font-size: 14.5px;
+  line-height: 1.62;
   word-break: break-word;
   position: relative;
 }
 
-.bub-ai {
-  background: var(--bub-ai-bg);
-  border: 1px solid var(--bub-ai-border);
-  color: var(--bub-ai-color);
-  border-bottom-left-radius: var(--r-xs);
-  backdrop-filter: blur(12px);
+.msg-bubble.user {
+  background: var(--user-bub-bg);
+  color: var(--user-bub-txt);
+  border-bottom-right-radius: 4px;
+  box-shadow: var(--user-bub-shadow);
+}
+
+.msg-bubble.ai {
+  background: var(--ai-bub-bg);
+  border: 1px solid var(--ai-bub-border);
+  color: var(--ai-bub-txt);
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--ai-bub-shadow);
   padding-right: 48px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.bub-user {
-  background: var(--bub-user-bg);
-  color: #ffffff;
-  border-bottom-right-radius: var(--r-xs);
-  box-shadow: 0 4px 24px rgba(14, 165, 233, 0.28), 0 1px 0 rgba(255, 255, 255, 0.16) inset;
+.msg-bubble.error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #DC2626;
+  border-bottom-left-radius: 4px;
 }
 
-.bub-err {
-  background: var(--bub-err-bg);
-  border: 1px solid var(--bub-err-border);
-  color: var(--bub-err-color);
-  border-radius: var(--r-xl);
-  border-bottom-left-radius: var(--r-xs);
+.theme-dark .msg-bubble.error, [data-theme="dark"] .msg-bubble.error {
+  background: rgba(239, 68, 68, 0.14);
+  color: #F87171;
 }
 
-.ts {
+.msg-timestamp {
   font-size: 10.5px;
-  color: var(--txt-3);
-  padding: 0 6px;
-  letter-spacing: 0.02em;
+  color: var(--txt-tertiary);
+  padding: 0 4px;
+  letter-spacing: 0.01em;
 }
 
-/* ── Copy button inside AI bubble ── */
-.copy-btn {
+/* Copy button inside AI bubble */
+.msg-copy-btn {
   position: absolute;
-  top: 9px;
+  top: 10px;
   right: 10px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px solid var(--stroke);
-  border-radius: var(--r-xs);
-  color: var(--txt-2);
-  font-family: var(--f-ui);
-  font-size: 10.5px;
+  background: var(--btn-icon-bg);
+  border: 1px solid var(--btn-icon-border);
+  border-radius: var(--radius-xs);
+  color: var(--txt-secondary);
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--t) var(--ease), background var(--t), color var(--t);
-  z-index: 2;
-  backdrop-filter: blur(6px);
+  transition: all var(--t-fast) var(--ease-spring);
 }
 
-.bub-ai:hover .copy-btn {
+.msg-bubble.ai:hover .msg-copy-btn {
   opacity: 1;
   pointer-events: auto;
 }
 
-.copy-btn:hover {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: rgba(56, 189, 248, 0.3);
-  color: var(--sky-deep);
+.msg-copy-btn:hover {
+  background: var(--btn-icon-hover-bg);
+  color: var(--txt-accent);
 }
 
-html[data-theme="dark"] .copy-btn:hover,
-:root:not([data-theme="light"]) .copy-btn:hover {
-  color: #bae6fd;
-}
-
-.copy-btn.copied {
+.msg-copy-btn.copied {
   opacity: 1;
   pointer-events: auto;
-  color: #10b981;
-  border-color: rgba(16, 185, 129, 0.35);
-  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.1);
 }
 
-.copy-btn svg { width: 10px; height: 10px; }
-
-html[data-theme="light"] .copy-btn,
-html.light .copy-btn {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(14, 165, 233, 0.22);
-  color: var(--txt-1);
+.msg-copy-btn svg {
+  width: 11px;
+  height: 11px;
 }
 
-/* ── Markdown in AI bubbles ── */
-.bub-ai .md-body { color: var(--bub-ai-color); }
-.bub-ai .md-body p { margin: 0 0 0.65em; }
-.bub-ai .md-body p:last-child { margin-bottom: 0; }
-.bub-ai .md-body h1, .bub-ai .md-body h2, .bub-ai .md-body h3,
-.bub-ai .md-body h4, .bub-ai .md-body h5, .bub-ai .md-body h6 {
-  font-family: var(--f-ui);
+/* Markdown in AI Bubbles */
+.md-content { color: inherit; }
+.md-content p { margin: 0 0 0.65em; }
+.md-content p:last-child { margin-bottom: 0; }
+.md-content h1, .md-content h2, .md-content h3 {
+  font-family: var(--font-heading);
   font-weight: 600;
-  letter-spacing: -0.3px;
-  margin: 0.9em 0 0.3em;
+  margin: 0.85em 0 0.35em;
+  color: var(--txt-primary);
   line-height: 1.3;
-  color: var(--txt-0);
 }
-.bub-ai .md-body h1 { font-size: 18px; }
-.bub-ai .md-body h2 { font-size: 16px; }
-.bub-ai .md-body h3 { font-size: 14.5px; }
-.bub-ai .md-body ul, .bub-ai .md-body ol { padding-left: 20px; margin: 0.4em 0 0.6em; }
-.bub-ai .md-body li { margin: 0.2em 0; }
-.bub-ai .md-body strong { font-weight: 600; color: var(--txt-0); }
-.bub-ai .md-body em { font-style: italic; color: var(--txt-1); }
-.bub-ai .md-body a { color: var(--sky-deep); text-decoration: underline; text-underline-offset: 2px; }
-html[data-theme="dark"] .bub-ai .md-body a,
-:root:not([data-theme="light"]) .bub-ai .md-body a { color: #7dd3fc; }
-
-.bub-ai .md-body code {
+.md-content h1 { font-size: 17.5px; }
+.md-content h2 { font-size: 16px; }
+.md-content h3 { font-size: 14.5px; }
+.md-content ul, .md-content ol { padding-left: 20px; margin: 0.4em 0 0.6em; }
+.md-content li { margin: 0.25em 0; }
+.md-content strong { font-weight: 600; color: var(--txt-primary); }
+.md-content a { color: var(--txt-accent); text-decoration: underline; text-underline-offset: 2px; }
+.md-content code {
   font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 12.5px;
   background: var(--inline-code-bg);
   border: 1px solid var(--inline-code-border);
   border-radius: 4px;
   padding: 1px 5px;
-  color: var(--inline-code-color);
+  color: var(--inline-code-txt);
 }
-
-.bub-ai .md-body pre {
+.md-content pre {
   background: var(--code-bg);
   border: 1px solid var(--code-border);
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-sm);
   padding: 12px 14px;
   margin: 0.6em 0;
   overflow-x: auto;
 }
-
-.bub-ai .md-body pre code {
+.md-content pre code {
   background: none;
   border: none;
   padding: 0;
+  color: var(--code-txt);
   font-size: 12.5px;
-  color: var(--code-color);
 }
-
-.bub-ai .md-body blockquote {
-  border-left: 3px solid var(--sky-mid);
+.md-content blockquote {
+  border-left: 3px solid var(--txt-accent);
   padding-left: 12px;
   margin: 0.6em 0;
-  color: var(--txt-1);
+  color: var(--txt-secondary);
   font-style: italic;
 }
 
-/* ── Typing Indicator ── */
+/* Typing Indicator */
 .typing-row {
   display: flex;
   gap: 12px;
   align-items: flex-end;
-  animation: msgIn 0.3s var(--ease) both;
+  animation: msgEntrance 0.3s var(--ease-spring) both;
 }
 
-.typing-bub {
+.typing-bubble {
   padding: 12px 16px;
-  background: var(--bub-ai-bg);
-  border: 1px solid var(--bub-ai-border);
-  border-radius: var(--r-xl);
-  border-bottom-left-radius: var(--r-xs);
+  background: var(--ai-bub-bg);
+  border: 1px solid var(--ai-bub-border);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: 4px;
   display: flex;
   align-items: center;
   gap: 5px;
-  backdrop-filter: blur(10px);
+  box-shadow: var(--ai-bub-shadow);
 }
 
-.tdot {
-  width: 5px;
-  height: 5px;
+.typing-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--sky-mid);
-  animation: tdotBounce 1.3s ease-in-out infinite;
+  background: var(--txt-accent);
+  animation: typingBounce 1.4s ease-in-out infinite;
 }
 
-.tdot:nth-child(2) { animation-delay: 0.16s; }
-.tdot:nth-child(3) { animation-delay: 0.32s; }
+.typing-dot:nth-child(2) { animation-delay: 0.18s; }
+.typing-dot:nth-child(3) { animation-delay: 0.36s; }
 
-@keyframes tdotBounce {
+@keyframes typingBounce {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
-  30%           { transform: translateY(-6px); opacity: 1; }
+  30%           { transform: translateY(-5px); opacity: 1; }
 }
 
 /* ═══════════════════════════════════════════
-   FLOATING INPUT ZONE (SEAMLESS GLASS)
+   MESSAGE COMPOSER (ROUNDED PILL BAR)
 ═══════════════════════════════════════════ */
-.input-zone {
+.composer-zone {
   position: relative;
-  z-index: 10;
-  padding: 10px 28px;
-  padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
-  background: transparent;
+  z-index: 20;
+  padding: 8px 20px 20px;
+  padding-bottom: max(18px, env(safe-area-inset-bottom, 18px));
   width: 100%;
   flex-shrink: 0;
+  background: transparent;
 }
 
-.input-inner {
-  max-width: var(--chat-max);
+.composer-inner {
+  max-width: var(--chat-max-width);
   margin: 0 auto;
   width: 100%;
 }
 
-.input-bar {
+.composer-pill {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
-  background: var(--input-bar-bg);
-  border: 1px solid var(--input-bar-border);
-  border-radius: var(--r-2xl);
-  padding: 10px 10px 10px 18px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease), background var(--t);
+  background: var(--composer-bg);
+  border: 1px solid var(--composer-border);
+  border-radius: var(--radius-full);
+  padding: 5px 7px 5px 18px;
+  box-shadow: var(--composer-shadow);
+  transition: all var(--t-normal) var(--ease-spring);
   position: relative;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
-.input-bar:focus-within {
-  border-color: var(--input-bar-focus);
-  box-shadow: 0 0 0 1px var(--input-bar-focus),
-              0 0 24px var(--accent-glow2),
-              0 0 48px var(--accent-glow);
+.composer-pill:focus-within {
+  border-color: var(--composer-focus-border);
+  box-shadow: var(--composer-focus-shadow);
 }
 
-textarea#inp {
+textarea.msg-input {
   flex: 1;
   background: transparent;
   border: none;
   outline: none;
-  color: var(--txt-0);
-  font-family: var(--f-ui);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.58;
+  color: var(--txt-primary);
+  font-size: 14.5px;
+  line-height: 1.45;
   resize: none;
-  min-height: 22px;
-  max-height: 150px;
+  min-height: 24px;
+  max-height: 140px;
   overflow-y: auto;
+  padding: 6px 0;
   scrollbar-width: none;
-  padding: 0;
-  letter-spacing: -0.1px;
-  position: relative;
-  z-index: 2;
+  min-width: 0;
+  font-family: inherit;
 }
 
-textarea#inp::-webkit-scrollbar { display: none; }
-textarea#inp::placeholder { color: var(--txt-3); }
+textarea.msg-input::-webkit-scrollbar { display: none; }
+textarea.msg-input::placeholder { color: var(--txt-tertiary); }
 
-.send {
+.composer-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.composer-btn-attach {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--txt-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.composer-btn-attach:hover {
+  color: var(--txt-accent);
+  background: var(--btn-icon-bg);
+}
+
+.composer-btn-attach svg {
+  width: 18px;
+  height: 18px;
+}
+
+.composer-btn-send {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--btn-icon-bg);
+  border: 1px solid var(--btn-icon-border);
+  color: var(--txt-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-spring);
+}
+
+.composer-btn-send.active {
+  background: var(--btn-purple-bg);
+  color: var(--btn-purple-txt, #FFFFFF);
+  border-color: transparent;
+  box-shadow: var(--btn-purple-shadow);
+}
+
+.composer-btn-send:hover {
+  transform: scale(1.05);
+}
+
+.composer-btn-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.composer-btn-send svg {
+  width: 14px;
+  height: 14px;
+}
+
+.composer-btn-voice {
   width: 36px;
   height: 36px;
-  border-radius: var(--r-md);
-  background: var(--accent-grad);
+  border-radius: 50%;
+  background: var(--btn-purple-bg);
   border: none;
-  color: #ffffff;
-  cursor: pointer;
+  color: var(--btn-purple-txt, #FFFFFF);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 0 16px var(--accent-glow);
-  transition: all var(--t) var(--ease);
+  cursor: pointer;
+  box-shadow: var(--btn-purple-shadow);
+  transition: all var(--t-fast) var(--ease-spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.composer-btn-voice:hover {
+  transform: scale(1.06);
+  background: var(--btn-purple-hover);
+}
+
+.composer-btn-voice:active {
+  transform: scale(0.95);
+}
+
+.composer-btn-voice svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ═══════════════════════════════════════════
+   DEDICATED VOICE INTERFACE (OVERLAY)
+═══════════════════════════════════════════ */
+.voice-view {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(251, 251, 254, 0.98);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  padding-top: max(20px, env(safe-area-inset-top, 20px));
+  padding-bottom: max(32px, env(safe-area-inset-bottom, 32px));
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.98);
+  transition: opacity 300ms var(--ease-spring), transform 300ms var(--ease-spring), background 300ms ease;
+}
+
+.voice-view.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.voice-view.dark-mode-voice {
+  background: #000000;
+  color: #FFFFFF;
+}
+
+.voice-view.dark-mode-voice .voice-main-mic-btn {
+  background: #0D0D0D;
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9), 0 0 24px rgba(255, 255, 255, 0.08);
+}
+
+.voice-view.dark-mode-voice .voice-pulse-ring {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.voice-view.dark-mode-voice .wave-bar {
+  background: #FFFFFF !important;
+}
+
+.voice-view.dark-mode-voice .voice-send-btn {
+  background: #FFFFFF;
+  color: #000000;
+}
+
+.voice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.voice-back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--btn-icon-bg);
+  border: 1px solid var(--btn-icon-border);
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.voice-back-btn:hover {
+  transform: translateX(-2px);
+}
+
+.voice-sparkle {
+  color: var(--lavender-500);
+}
+
+.voice-transcription-wrap {
+  width: 100%;
+  max-width: 580px;
+  margin: 20px auto 0;
+  padding: 0 16px;
+  min-height: 110px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.voice-transcription {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--txt-secondary);
+  text-align: center;
+  font-weight: 400;
+  transition: color var(--t-fast);
+}
+
+.voice-transcription.active-speech {
+  color: var(--txt-primary);
+}
+
+.voice-center-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto 0;
+}
+
+.voice-status-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--txt-secondary);
+  margin-bottom: 30px;
+  letter-spacing: -0.1px;
+}
+
+.voice-mic-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(157, 133, 242, 0.28);
+  animation: pulseRings 2.8s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+  pointer-events: none;
+}
+
+.voice-pulse-ring:nth-child(2) { animation-delay: 0.7s; }
+.voice-pulse-ring:nth-child(3) { animation-delay: 1.4s; }
+
+@keyframes pulseRings {
+  0% { transform: scale(0.85); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.voice-main-mic-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 8px 30px rgba(130, 98, 233, 0.22);
+  color: var(--lavender-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   position: relative;
   z-index: 2;
-  overflow: hidden;
+  transition: transform var(--t-fast) var(--ease-spring);
 }
 
-.send::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(145deg, rgba(255,255,255,0.25), transparent 55%);
+.voice-main-mic-btn:hover {
+  transform: scale(1.08);
 }
 
-.send:hover {
-  transform: scale(1.06);
-  box-shadow: 0 0 24px var(--accent-glow);
+.voice-main-mic-btn svg {
+  width: 28px;
+  height: 28px;
 }
 
-.send:active { transform: scale(0.95); }
-.send:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
-.send svg { width: 15px; height: 15px; position: relative; z-index: 1; }
+.voice-bottom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
 
-.input-hint {
+.voice-action-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: 9px;
-  font-size: 11px;
-  color: var(--txt-3);
-  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-spring);
+  border: none;
 }
 
-.input-hint kbd {
-  display: inline-flex;
+.voice-action-btn.trash {
+  background: var(--btn-icon-bg);
+  border: 1px solid var(--btn-icon-border);
+  color: var(--txt-secondary);
+}
+
+.voice-action-btn.trash:hover {
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.1);
+  transform: scale(1.06);
+}
+
+.voice-action-btn.send {
+  background: var(--btn-purple-bg);
+  color: var(--btn-purple-txt, #FFFFFF);
+  box-shadow: var(--btn-purple-shadow);
+}
+
+.voice-action-btn.send:hover {
+  transform: scale(1.08);
+}
+
+.voice-waveform-container {
+  display: flex;
   align-items: center;
-  padding: 1px 5px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--stroke);
-  border-radius: 4px;
-  font-family: var(--f-ui);
-  font-size: 10px;
-  color: var(--txt-2);
+  justify-content: center;
+  gap: 3.5px;
+  height: 40px;
+  flex: 1;
+  max-width: 240px;
+  margin: 0 16px;
 }
 
-html[data-theme="light"] .input-hint kbd,
-html.light .input-hint kbd {
-  background: rgba(255,255,255,0.85);
-  border-color: rgba(14, 165, 233, 0.22);
-  color: #334155;
+.wave-bar {
+  width: 3px;
+  height: 8px;
+  background: var(--txt-secondary);
+  border-radius: 3px;
+  transition: height 0.1s ease;
 }
 
-/* ═══════════════════════════════════════════
-   MAGIC UI BORDER BEAM EFFECT
-═══════════════════════════════════════════ */
-border-beam {
-  display: contents;
-  pointer-events: none;
+.voice-view.active .wave-bar {
+  background: var(--lavender-500);
+  animation: waveDance 1.2s ease-in-out infinite alternate;
 }
 
-.border-beam-container {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: var(--border-beam-width, var(--beam-width, 1.5px));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  overflow: hidden;
-  z-index: 1;
-}
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.25s; }
+.wave-bar:nth-child(4) { animation-delay: 0.15s; }
+.wave-bar:nth-child(5) { animation-delay: 0.3s; }
+.wave-bar:nth-child(6) { animation-delay: 0.05s; }
+.wave-bar:nth-child(7) { animation-delay: 0.2s; }
+.wave-bar:nth-child(8) { animation-delay: 0.35s; }
+.wave-bar:nth-child(9) { animation-delay: 0.12s; }
+.wave-bar:nth-child(10) { animation-delay: 0.28s; }
 
-.border-beam-line {
-  position: absolute;
-  aspect-ratio: 1;
-  width: var(--border-beam-size, var(--beam-size, 240px));
-  background: linear-gradient(
-    to left,
-    var(--border-beam-color-from, var(--beam-color-from, #38bdf8)),
-    var(--border-beam-color-to, var(--beam-color-to, #0284c7)),
-    transparent
-  );
-  offset-path: rect(0 auto auto 0 round var(--border-beam-size, var(--beam-size, 240px)));
-  animation: border-beam-travel var(--border-beam-duration, var(--beam-duration, 6s)) linear infinite;
-  animation-delay: var(--border-beam-delay, 0s);
-  filter: drop-shadow(0 0 8px var(--border-beam-glow, var(--beam-glow, rgba(56, 189, 248, 0.35))));
-}
-
-.border-beam-line.reverse {
-  animation-direction: reverse;
-}
-
-@keyframes border-beam-travel {
-  0% {
-    offset-distance: 0%;
-  }
-  100% {
-    offset-distance: 100%;
-  }
-}
-
-/* Fallback for browsers without CSS offset-path: rect() */
-@supports not (offset-path: rect(0 auto auto 0 round 10px)) {
-  .border-beam-line {
-    inset: -150%;
-    width: auto;
-    aspect-ratio: auto;
-    background: conic-gradient(
-      from 0deg,
-      transparent 0deg,
-      transparent 280deg,
-      var(--border-beam-color-to, var(--beam-color-to, #0284c7)) 325deg,
-      var(--border-beam-color-from, var(--beam-color-from, #38bdf8)) 360deg
-    );
-    animation: border-beam-rotate var(--border-beam-duration, var(--beam-duration, 6s)) linear infinite;
-  }
-  .border-beam-line.reverse {
-    animation-direction: reverse;
-  }
-  @keyframes border-beam-rotate {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-}
-
-/* ═══════════════════════════════════════════
-   ACCESSIBILITY & FOCUS
-═══════════════════════════════════════════ */
-:focus-visible {
-  outline: 2px solid var(--sky);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
-  }
-  .orb {
-    animation: none !important;
-    opacity: 0.5;
-  }
-}
-
-/* ═══════════════════════════════════════════
-   RESPONSIVE DESIGN (MOBILE & TABLET)
-═══════════════════════════════════════════ */
-@media (max-width: 680px) {
-  .topbar {
-    padding: 10px 16px;
-    padding-top: max(10px, env(safe-area-inset-top, 10px));
-  }
-  .brand-sub { display: none; }
-  .btn-label { display: none; }
-  .topbar-action-btn {
-    padding: 6px 10px;
-    min-height: 38px;
-    min-width: 38px;
-  }
-  .topbar-icon-btn {
-    min-height: 38px;
-    min-width: 38px;
-  }
-  .messages {
-    padding: 18px 12px 14px;
-    gap: 14px;
-  }
-  .bub-col {
-    max-width: 88%;
-  }
-  .input-zone {
-    padding: 6px 12px;
-    padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
-  }
-  .input-bar {
-    padding: 8px 8px 8px 14px;
-  }
-  .send {
-    width: 38px;
-    height: 38px;
-  }
-  .empty { padding: 36px 14px 16px; }
-  .empty-h { font-size: 26px; }
-  .empty-gem { width: 50px; height: 50px; }
-  .status span.status-text { display: none; }
+@keyframes waveDance {
+  0%   { height: 6px; }
+  50%  { height: 28px; }
+  100% { height: 12px; }
 }
 
 /* ═══════════════════════════════════════════
@@ -1311,13 +1269,13 @@ border-beam {
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 18, 0.55);
+  background: rgba(11, 10, 18, 0.45);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  z-index: 90;
+  z-index: 900;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 280ms var(--ease);
+  transition: opacity 280ms var(--ease-smooth);
 }
 
 .sidebar-backdrop.active {
@@ -1330,85 +1288,109 @@ border-beam {
   top: 0;
   left: 0;
   bottom: 0;
-  width: 300px;
+  width: 310px;
   max-width: 86vw;
-  background: var(--topbar-bg);
-  backdrop-filter: blur(28px) saturate(1.5);
-  -webkit-backdrop-filter: blur(28px) saturate(1.5);
-  border-right: 1px solid var(--stroke);
-  z-index: 100;
+  background: rgba(251, 251, 254, 0.98);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  border-right: 1px solid rgba(130, 98, 233, 0.12);
+  z-index: 950;
   display: flex;
   flex-direction: column;
   transform: translateX(-100%);
-  transition: transform 300ms var(--ease), box-shadow 300ms var(--ease);
+  transition: transform 300ms var(--ease-spring), box-shadow 300ms var(--ease-spring), background 300ms ease;
   box-shadow: none;
+}
+
+.sidebar.dark-sidebar {
+  background: #000000;
+  border-right-color: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
+.sidebar.dark-sidebar .sidebar-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar.dark-sidebar .sidebar-search-bar {
+  background: #0A0A0A;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.sidebar.dark-sidebar .sidebar-search-bar input {
+  color: #FFFFFF;
+}
+
+.sidebar.dark-sidebar .sidebar-chat-item {
+  color: #E4E4E7;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar.dark-sidebar .sidebar-chat-item:hover,
+.sidebar.dark-sidebar .sidebar-chat-item.active {
+  background: #141414;
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+.sidebar.dark-sidebar .sidebar-footer {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar.dark-sidebar .sidebar-action-btn {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
 }
 
 .sidebar.open {
   transform: translateX(0);
-  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.4);
-}
-
-html[data-theme="light"] .sidebar {
-  background: rgba(240, 249, 255, 0.95);
-  border-right-color: rgba(14, 165, 233, 0.22);
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.35);
 }
 
 .sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid var(--stroke);
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(130, 98, 233, 0.1);
 }
 
 .sidebar-brand {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
-  color: var(--txt-0);
-  letter-spacing: -0.2px;
+  color: inherit;
 }
 
-.sidebar-icon {
-  width: 17px;
-  height: 17px;
-  color: var(--sky);
-}
-
-html[data-theme="light"] .sidebar-icon {
-  color: var(--sky-deep);
+.sidebar-brand svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lavender-600);
 }
 
 .sidebar-close-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--r-sm);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
   background: transparent;
-  border: 1px solid transparent;
-  color: var(--txt-2);
+  border: none;
+  color: var(--txt-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--t) var(--ease);
+  transition: all var(--t-fast);
 }
 
 .sidebar-close-btn:hover {
-  background: var(--btn-topbar-hover-bg);
-  border-color: var(--btn-topbar-hover-border);
-  color: var(--txt-0);
-}
-
-.sidebar-close-btn svg {
-  width: 15px;
-  height: 15px;
+  color: inherit;
+  background: var(--btn-icon-bg);
 }
 
 .sidebar-actions {
-  padding: 12px 14px 6px;
+  padding: 14px 16px 8px;
 }
 
 .sidebar-new-btn {
@@ -1417,22 +1399,20 @@ html[data-theme="light"] .sidebar-icon {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 9px 14px;
-  background: var(--accent-grad);
+  padding: 10px 14px;
+  background: var(--btn-purple-bg);
   border: none;
-  border-radius: var(--r-md);
-  color: #ffffff;
-  font-family: var(--f-ui);
-  font-size: 13px;
+  border-radius: var(--radius-md);
+  color: var(--btn-purple-txt, #FFFFFF);
+  font-size: 13.5px;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 0 14px var(--accent-glow);
-  transition: all var(--t) var(--ease);
+  box-shadow: var(--btn-purple-shadow);
+  transition: all var(--t-fast) var(--ease-spring);
 }
 
 .sidebar-new-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 0 22px var(--accent-glow);
 }
 
 .sidebar-new-btn svg {
@@ -1441,7 +1421,7 @@ html[data-theme="light"] .sidebar-icon {
 }
 
 .sidebar-search {
-  padding: 6px 14px 10px;
+  padding: 6px 16px 10px;
 }
 
 .search-input-wrap {
@@ -1456,30 +1436,29 @@ html[data-theme="light"] .sidebar-icon {
   left: 10px;
   width: 14px;
   height: 14px;
-  color: var(--txt-2);
+  color: var(--txt-tertiary);
   pointer-events: none;
 }
 
 #sidebar-search-input {
   width: 100%;
-  padding: 7px 28px 7px 32px;
-  background: var(--chip-bg);
-  border: 1px solid var(--stroke);
-  border-radius: var(--r-sm);
-  color: var(--txt-0);
-  font-family: var(--f-ui);
-  font-size: 12.5px;
+  padding: 8px 28px 8px 32px;
+  background: rgba(130, 98, 233, 0.06);
+  border: 1px solid rgba(130, 98, 233, 0.12);
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font-size: 13px;
   outline: none;
-  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+  transition: border-color var(--t-fast);
+  font-family: inherit;
 }
 
 #sidebar-search-input:focus {
-  border-color: var(--sky);
-  box-shadow: 0 0 10px var(--sky-glow);
+  border-color: var(--lavender-600);
 }
 
 #sidebar-search-input::placeholder {
-  color: var(--txt-3);
+  color: var(--txt-tertiary);
 }
 
 .search-clear-btn {
@@ -1487,17 +1466,16 @@ html[data-theme="light"] .sidebar-icon {
   right: 8px;
   background: transparent;
   border: none;
-  color: var(--txt-2);
+  color: var(--txt-tertiary);
   cursor: pointer;
   font-size: 12px;
   padding: 2px 4px;
-  border-radius: 4px;
 }
 
 .sidebar-chat-list {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 10px;
+  padding: 6px 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1507,35 +1485,27 @@ html[data-theme="light"] .sidebar-icon {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
-  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
   background: transparent;
   border: 1px solid transparent;
-  color: var(--txt-1);
-  font-size: 12.5px;
+  color: var(--txt-secondary);
+  font-size: 13px;
   cursor: pointer;
-  transition: all var(--t) var(--ease);
-  position: relative;
+  transition: all var(--t-fast);
   user-select: none;
 }
 
 .sidebar-chat-item:hover {
-  background: var(--chip-hover-bg);
-  border-color: var(--chip-hover-border);
-  color: var(--txt-0);
+  background: rgba(130, 98, 233, 0.08);
+  color: inherit;
 }
 
 .sidebar-chat-item.active {
-  background: rgba(56, 189, 248, 0.12);
-  border-color: rgba(56, 189, 248, 0.35);
-  color: var(--sky);
+  background: rgba(130, 98, 233, 0.12);
+  border-color: rgba(130, 98, 233, 0.25);
+  color: var(--lavender-600);
   font-weight: 500;
-}
-
-html[data-theme="light"] .sidebar-chat-item.active {
-  background: rgba(14, 165, 233, 0.15);
-  border-color: rgba(14, 165, 233, 0.45);
-  color: var(--sky-deep);
 }
 
 .chat-item-content {
@@ -1550,13 +1520,12 @@ html[data-theme="light"] .sidebar-chat-item.active {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 12.5px;
-  line-height: 1.35;
+  font-size: 13px;
 }
 
 .chat-item-time {
-  font-size: 10px;
-  color: var(--txt-3);
+  font-size: 10.5px;
+  color: var(--txt-tertiary);
   margin-top: 2px;
 }
 
@@ -1566,13 +1535,13 @@ html[data-theme="light"] .sidebar-chat-item.active {
   border-radius: 4px;
   background: transparent;
   border: none;
-  color: var(--txt-2);
+  color: var(--txt-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity var(--t), color var(--t);
+  transition: opacity var(--t-fast), color var(--t-fast);
   flex-shrink: 0;
 }
 
@@ -1581,25 +1550,25 @@ html[data-theme="light"] .sidebar-chat-item.active {
 }
 
 .chat-item-del-btn:hover {
-  color: #ef4444;
+  color: #EF4444;
 }
 
 .chat-item-del-btn svg {
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
 }
 
 .sidebar-empty-hint {
   text-align: center;
   padding: 30px 14px;
-  color: var(--txt-3);
-  font-size: 12px;
+  color: var(--txt-tertiary);
+  font-size: 12.5px;
   font-style: italic;
 }
 
 .sidebar-footer {
-  padding: 10px 14px 14px;
-  border-top: 1px solid var(--stroke);
+  padding: 12px 16px 16px;
+  border-top: 1px solid rgba(130, 98, 233, 0.1);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1611,21 +1580,20 @@ html[data-theme="light"] .sidebar-chat-item.active {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 7px 10px;
+  padding: 8px 10px;
   background: transparent;
-  border: 1px solid var(--stroke);
-  border-radius: var(--r-sm);
-  color: var(--txt-2);
-  font-family: var(--f-ui);
-  font-size: 11.5px;
+  border: 1px solid rgba(130, 98, 233, 0.15);
+  border-radius: var(--radius-sm);
+  color: var(--txt-secondary);
+  font-size: 12px;
   cursor: pointer;
-  transition: all var(--t) var(--ease);
+  transition: all var(--t-fast);
 }
 
 .sidebar-clear-all-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.08);
   border-color: rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  color: #EF4444;
 }
 
 .sidebar-clear-all-btn svg {
@@ -1634,48 +1602,467 @@ html[data-theme="light"] .sidebar-chat-item.active {
 }
 
 .sidebar-footer-hint {
-  font-size: 9.5px;
-  color: var(--txt-3);
+  font-size: 10px;
+  color: var(--txt-tertiary);
   text-align: center;
   letter-spacing: 0.02em;
 }
 
-.topbar-left-group {
+/* ═══════════════════════════════════════════
+   OPTIONS DROPDOWN POPOVER
+═══════════════════════════════════════════ */
+.options-popover {
+  position: absolute;
+  top: 52px;
+  right: 24px;
+  width: 190px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card-hover);
+  padding: 6px;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 950;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px) scale(0.95);
+  transition: all 180ms var(--ease-spring);
 }
 
+.options-popover.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.options-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-xs);
+  color: var(--txt-primary);
+  font-size: 12.5px;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background var(--t-fast);
+  font-family: inherit;
+}
+
+.options-item:hover {
+  background: var(--btn-icon-bg);
+  color: var(--txt-accent);
+}
+
+.options-item svg {
+  width: 14px;
+  height: 14px;
+  color: var(--txt-secondary);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE DESIGN (MOBILE & TABLET)
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .header {
+    padding: 10px 14px;
+    padding-top: max(10px, env(safe-area-inset-top, 10px));
+  }
+  .stage-inner {
+    padding: 12px 12px 8px;
+  }
+  .cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    max-width: 100%;
+    margin-bottom: 12px;
+  }
+  .s-card {
+    padding: 11px 12px;
+    border-radius: 14px;
+    min-width: 0;
+  }
+  .s-card-title {
+    font-size: 12px;
+  }
+  .s-card-desc {
+    font-size: 10px;
+    line-height: 1.35;
+  }
+  .greeting-main {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  .greeting-pre {
+    font-size: 15px;
+    margin-bottom: 3px;
+  }
+  .ai-orb-wrap {
+    width: 82px;
+    height: 82px;
+    margin-bottom: 12px;
+  }
+  .ai-orb {
+    width: 66px;
+    height: 66px;
+  }
+  .composer-zone {
+    padding: 4px 10px 12px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+  }
+  .composer-pill {
+    padding: 3px 6px 3px 14px;
+  }
+  textarea.msg-input {
+    font-size: 13.5px;
+    min-width: 0;
+  }
+  .user-email {
+    display: none;
+  }
+  .header-actions {
+    gap: 6px;
+  }
+  .header-btn {
+    width: 32px;
+    height: 32px;
+  }
+  .header-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
 </style>
 </head>
 <body>
 
-<!-- ═══ TOPO FIELD WebGL Background ═══ -->
-<div id="topo-bg" aria-hidden="true">
-  <canvas id="topo-canvas"></canvas>
+<!-- ═══════════════════════════════════════════
+     PERSISTENT SVG LIQUID INK MASK
+═══════════════════════════════════════════ -->
+<svg id="svg-mask-layer" aria-hidden="true">
+  <defs>
+    <!-- Organic liquid turbulence displacement filter -->
+    <filter id="liquid-filter" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="42" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="55" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+      <feGaussianBlur in="displaced" stdDeviation="1.0" />
+    </filter>
+
+    <!-- White path defines where the dark layer is revealed; black is transparent -->
+    <mask id="ink-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+      <rect width="100%" height="100%" fill="black" />
+      <g filter="url(#liquid-filter)">
+        <path id="ink-mask-path" fill="white" d="" />
+      </g>
+    </mask>
+  </defs>
+</svg>
+
+<!-- ═══════════════════════════════════════════
+     VIEWPORT HOLDING DUAL THEME LAYERS
+═══════════════════════════════════════════ -->
+<div class="app-viewport">
+
+  <!-- ═══ LAYER 1: LIGHT THEME (BASE LAYER) ═══ -->
+  <div class="layer-light theme-light" id="light-layer">
+    <div class="topo-bg"><canvas class="topo-canvas" id="topo-canvas-light"></canvas></div>
+
+    <header class="header">
+      <div class="user-profile" onclick="toggleSidebar(true)" title="Lumen — Click for chat history">
+        <div class="user-avatar-wrap">
+          <div class="user-avatar">
+            <img class="user-avatar-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=128&auto=format&fit=crop&q=80" alt="Lumen" onerror="this.onerror=null; this.src='https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg';" />
+          </div>
+          <div class="user-status-dot"></div>
+        </div>
+        <div class="user-meta">
+          <span class="user-name">Lumen</span>
+          <span class="user-email">AI Assistant</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Reversible Theme Toggle Button -->
+        <button class="header-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light / Dark mode" aria-label="Toggle theme">
+          <svg class="theme-moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
+          </svg>
+          <svg class="theme-sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/>
+          </svg>
+        </button>
+
+        <button class="header-btn options-btn" onclick="toggleOptionsMenu(event)" title="Options menu" aria-label="Options menu">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/>
+          </svg>
+        </button>
+
+        <button class="header-btn grid-btn" onclick="toggleSidebar()" title="Open Chat History" aria-label="Open Chat History">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage stage-light" onscroll="syncStageScroll(this)">
+      <div class="stage-inner">
+        <section class="home-screen">
+          <div class="ai-orb-wrap" onclick="openVoiceMode()" title="Lumen AI — Click for Voice Mode">
+            <div class="ai-orb-glow"></div>
+            <div class="ai-orb"></div>
+          </div>
+          <div class="greeting-pre">Hello, Jackson</div>
+          <h1 class="greeting-main">How can I assist you today?</h1>
+          <div class="cards-grid">
+            <div class="s-card" onclick="sendPrompt('Synthesize my meeting notes into 5 key bullet points for the team')">
+              <div class="s-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>
+                </svg>
+              </div>
+              <div class="s-card-title">Synthesize Data</div>
+              <div class="s-card-desc">Turn my meeting notes into 5 key bullet points for the team</div>
+            </div>
+            <div class="s-card" onclick="sendPrompt('Generate 3 taglines for a new sustainable fashion brand')">
+              <div class="s-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18h6"/><path d="M10 22h4"/>
+                  <path d="M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 6h8c1.5-1.5 3-3.5 3-6a7 7 0 0 0-7-7z"/>
+                </svg>
+              </div>
+              <div class="s-card-title">Creative Brainstorm</div>
+              <div class="s-card-desc">Generate 3 taglines for a new sustainable fashion brand</div>
+            </div>
+            <div class="s-card" onclick="sendPrompt('Compare key differences between GDPR and CCPA')">
+              <div class="s-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path>
+                </svg>
+              </div>
+              <div class="s-card-title">Check Facts</div>
+              <div class="s-card-desc">Compare key differences between GDPR and CCPA</div>
+            </div>
+            <div class="s-card" onclick="sendPrompt('Explain complex tech concepts simply and quickly')">
+              <div class="s-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+              </div>
+              <div class="s-card-title">Explain Concept</div>
+              <div class="s-card-desc">Explain complex tech concepts simply and quickly</div>
+            </div>
+          </div>
+        </section>
+        <div class="messages-container messages-light" aria-live="polite"></div>
+      </div>
+    </main>
+
+    <div class="composer-zone">
+      <div class="composer-inner">
+        <div class="composer-pill">
+          <textarea class="msg-input msg-input-light" rows="1" placeholder="Ask me anything..." autocomplete="off" spellcheck="true" oninput="handleInputSync(this)"></textarea>
+          <div class="composer-tools">
+            <button class="composer-btn-attach" onclick="triggerAttachment()" title="Attach file" aria-label="Attach file">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <button class="composer-btn-send send-btn-light" onclick="submitMessage()" title="Send message" aria-label="Send message">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+            <button class="composer-btn-voice" onclick="openVoiceMode()" title="Voice Mode" aria-label="Voice input">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ LAYER 2: DARK THEME (OVERLAY LAYER MASKED WITH INK SPILL) ═══ -->
+  <div class="layer-dark theme-dark" id="dark-layer">
+    <div class="topo-bg"><canvas class="topo-canvas" id="topo-canvas-dark"></canvas></div>
+
+    <header class="header">
+      <div class="user-profile" onclick="toggleSidebar(true)" title="Lumen — Click for chat history">
+        <div class="user-avatar-wrap">
+          <div class="user-avatar">
+            <img class="user-avatar-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=128&auto=format&fit=crop&q=80" alt="Lumen" onerror="this.onerror=null; this.src='https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg';" />
+          </div>
+          <div class="user-status-dot"></div>
+        </div>
+        <div class="user-meta">
+          <span class="user-name">Lumen</span>
+          <span class="user-email">AI Assistant</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Reversible Theme Toggle Button (Exact same handler) -->
+        <button class="header-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light / Dark mode" aria-label="Toggle theme">
+          <svg class="theme-moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
+          </svg>
+          <svg class="theme-sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/>
+          </svg>
+        </button>
+
+        <button class="header-btn options-btn" onclick="toggleOptionsMenu(event)" title="Options menu" aria-label="Options menu">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/>
+          </svg>
+        </button>
+
+        <button class="header-btn grid-btn" onclick="toggleSidebar()" title="Open Chat History" aria-label="Open Chat History">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage stage-dark" onscroll="syncStageScroll(this)">
+      <div class="stage-inner">
+        <section class="home-screen">
+          <div class="ai-orb-wrap" onclick="openVoiceMode()" title="Lumen AI — Click for Voice Mode">
+            <div class="ai-orb-glow"></div>
+            <div class="ai-orb"></div>
+          </div>
+          <div class="greeting-pre">Hello, Jackson</div>
+          <h1 class="greeting-main">How can I assist you today?</h1>
+          <div class="cards-grid">
+            <div class="s-card" onclick="sendPrompt('Synthesize my meeting notes into 5 key bullet points for the team')">
+              <div class="s-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>
+                </svg>
+              </div>
+              <div class="s-card-title">Synthesize Data</div>
+              <div class="s-card-desc">Turn my meeting notes into 5 key bullet points for the team</div>
+            </div>
+            <div class="s-card" onclick="sendPrompt('Generate 3 taglines for a new sustainable fashion brand')">
+              <div class="s-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18h6"/><path d="M10 22h4"/>
+                  <path d="M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 6h8c1.5-1.5 3-3.5 3-6a7 7 0 0 0-7-7z"/>
+                </svg>
+              </div>
+              <div class="s-card-title">Creative Brainstorm</div>
+              <div class="s-card-desc">Generate 3 taglines for a new sustainable fashion brand</div>
+            </div>
+            <div class="s-card" onclick="sendPrompt('Compare key differences between GDPR and CCPA')">
+              <div class="s-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path>
+                </svg>
+              </div>
+              <div class="s-card-title">Check Facts</div>
+              <div class="s-card-desc">Compare key differences between GDPR and CCPA</div>
+            </div>
+            <div class="s-card" onclick="sendPrompt('Explain complex tech concepts simply and quickly')">
+              <div class="s-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+              </div>
+              <div class="s-card-title">Explain Concept</div>
+              <div class="s-card-desc">Explain complex tech concepts simply and quickly</div>
+            </div>
+          </div>
+        </section>
+        <div class="messages-container messages-dark" aria-live="polite"></div>
+      </div>
+    </main>
+
+    <div class="composer-zone">
+      <div class="composer-inner">
+        <div class="composer-pill">
+          <textarea class="msg-input msg-input-dark" rows="1" placeholder="Ask me anything..." autocomplete="off" spellcheck="true" oninput="handleInputSync(this)"></textarea>
+          <div class="composer-tools">
+            <button class="composer-btn-attach" onclick="triggerAttachment()" title="Attach file" aria-label="Attach file">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+            <button class="composer-btn-send send-btn-dark" onclick="submitMessage()" title="Send message" aria-label="Send message">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+            <button class="composer-btn-voice" onclick="openVoiceMode()" title="Voice Mode" aria-label="Voice input">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- Ambient atmospheric glow orbs -->
-<div class="ambient" aria-hidden="true">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
+<!-- ═══ SHARED POPUPS & SIDEBAR (ON TOP OF EVERYTHING) ═══ -->
+<div class="options-popover" id="options-popover">
+  <button class="options-item" onclick="startNewChat(false); closeOptionsMenu();">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>New Chat</span>
+  </button>
+  <button class="options-item" onclick="openVoiceMode(); closeOptionsMenu();">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+    <span>Voice Mode</span>
+  </button>
+  <button class="options-item" onclick="checkApiHealth(); closeOptionsMenu();">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    <span>System Status</span>
+  </button>
 </div>
 
-<!-- ═══ CHAT HISTORY SIDEBAR OVERLAY & DRAWER (SESSION-ONLY) ═══ -->
+<!-- ═══ CHAT HISTORY SIDEBAR OVERLAY & DRAWER ═══ -->
 <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar(false)" aria-hidden="true"></div>
 
 <aside class="sidebar" id="sidebar" aria-label="Chat history">
   <div class="sidebar-header">
     <div class="sidebar-brand">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
       </svg>
       <span>Chat History</span>
     </div>
     <button class="sidebar-close-btn" onclick="toggleSidebar(false)" aria-label="Close sidebar" title="Close sidebar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
     </button>
   </div>
@@ -1683,8 +2070,7 @@ html[data-theme="light"] .sidebar-chat-item.active {
   <div class="sidebar-actions">
     <button class="sidebar-new-btn" onclick="startNewChat(true)" aria-label="Start new chat">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
       <span>New Chat</span>
     </button>
@@ -1693,25 +2079,19 @@ html[data-theme="light"] .sidebar-chat-item.active {
   <div class="sidebar-search">
     <div class="search-input-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
       <input type="text" id="sidebar-search-input" placeholder="Search chats..." autocomplete="off" oninput="handleSearch(this.value)" aria-label="Search previous chats" />
       <button class="search-clear-btn" id="search-clear-btn" onclick="clearSearch()" aria-label="Clear search" style="display:none;">✕</button>
     </div>
   </div>
 
-  <div class="sidebar-chat-list" id="sidebar-chat-list" role="list">
-    <!-- Chat items injected dynamically -->
-  </div>
+  <div class="sidebar-chat-list" id="sidebar-chat-list" role="list"></div>
 
   <div class="sidebar-footer">
     <button class="sidebar-clear-all-btn" onclick="clearAllChats()" title="Clear all session chats" aria-label="Clear all chats">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="3 6 5 6 21 6"/>
-        <path d="M19 6l-1 14H6L5 6"/>
-        <path d="M10 11v6m4-6v6"/>
-        <path d="M9 6V4h6v2"/>
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/>
       </svg>
       <span>Clear History</span>
     </button>
@@ -1719,194 +2099,350 @@ html[data-theme="light"] .sidebar-chat-item.active {
   </div>
 </aside>
 
-<!-- ═══ APP SHELL ═══ -->
-<div class="app">
+<!-- ═══ DEDICATED VOICE INTERFACE (MATCHING REFERENCE IMAGE PHONE 2) ═══ -->
+<div class="voice-view" id="voice-view" role="dialog" aria-modal="true" aria-label="Voice Assistant">
+  <div class="voice-header">
+    <button class="voice-back-btn" onclick="closeVoiceMode()" aria-label="Back to chat" title="Back to chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+    </button>
+    <div class="voice-sparkle">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/>
+      </svg>
+    </div>
+  </div>
 
-  <!-- Topbar Header -->
-  <header class="topbar">
-    <div class="topbar-left-group">
-      <!-- Sidebar Hamburger Toggle Button -->
-      <button class="topbar-icon-btn sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle chat history" aria-label="Toggle chat history">
+  <div class="voice-transcription-wrap">
+    <p class="voice-transcription" id="voice-transcription">
+      Listening... Speak naturally or ask anything.
+    </p>
+  </div>
+
+  <div class="voice-center-zone">
+    <div class="voice-status-text" id="voice-status-text">Listening...</div>
+    <div class="voice-mic-container">
+      <div class="voice-pulse-ring"></div>
+      <div class="voice-pulse-ring"></div>
+      <div class="voice-pulse-ring"></div>
+      <button class="voice-main-mic-btn" id="voice-toggle-rec-btn" onclick="toggleVoiceRecording()" aria-label="Toggle voice recording">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
         </svg>
       </button>
+    </div>
+  </div>
 
-      <div class="brand">
-        <div class="logo-gem">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-          </svg>
-        </div>
-        <div class="brand-text">
-          <div class="brand-title-row">
-            <span class="brand-name">Lumen</span>
-            <span class="brand-badge">AI</span>
-          </div>
-          <span class="brand-sub">intelligence, refined</span>
-        </div>
-      </div>
+  <div class="voice-bottom-controls">
+    <button class="voice-action-btn trash" onclick="cancelVoiceSpeech()" title="Discard speech" aria-label="Discard speech">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/>
+      </svg>
+    </button>
+
+    <div class="voice-waveform-container" aria-hidden="true">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
     </div>
 
-    <div class="topbar-actions">
-      <!-- New Chat Button -->
-      <button class="topbar-action-btn" onclick="newChat()" title="Start new conversation" aria-label="New chat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        <span class="btn-label">New chat</span>
-      </button>
-
-      <!-- Clear Chat Button -->
-      <button class="topbar-icon-btn" onclick="newChat()" title="Clear conversation" aria-label="Clear chat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/>
-        </svg>
-      </button>
-
-      <!-- Status Indicator -->
-      <div class="status" title="Inference online">
-        <span class="status-dot"></span>
-        <span class="status-text">Online</span>
-      </div>
-
-      <div class="topbar-divider"></div>
-
-      <!-- Theme Switch Slider -->
-      <label class="theme-switch" for="theme-checkbox" title="Toggle Light / Dark mode" aria-label="Toggle theme">
-        <input type="checkbox" id="theme-checkbox" onchange="toggleTheme()">
-        <span class="theme-switch-track">
-          <span class="theme-switch-thumb">
-            <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
-            </svg>
-            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-              <circle cx="12" cy="12" r="4"/>
-              <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/>
-            </svg>
-          </span>
-        </span>
-      </label>
-    </div>
-  </header>
-
-  <!-- Main Chat Area -->
-  <main class="main">
-
-    <!-- Scrollable Messages Container -->
-    <div class="scroll-area" id="scroll-area">
-      <div class="messages" id="messages" aria-live="polite" aria-atomic="false">
-
-        <!-- Initial Empty State -->
-        <div class="empty" id="empty-state">
-          <div class="empty-gem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
-          </div>
-          <h1 class="empty-h">Ask <em>anything.</em></h1>
-          <p class="empty-p">Deep reasoning, precise writing, creative thinking — built for engineers and creators who demand more.</p>
-          <div class="chips">
-            <div class="chip" onclick="suggest('Explain the CAP theorem in distributed systems')">CAP theorem</div>
-            <div class="chip" onclick="suggest('Write a cinematic short story about solitude on Mars')">Story about Mars</div>
-            <div class="chip" onclick="suggest('Best practices for a production Node.js REST API')">Node.js API</div>
-            <div class="chip" onclick="suggest('Design a 6-day PPL hypertrophy workout split')">Hypertrophy plan</div>
-            <div class="chip" onclick="suggest('How does transformer attention mechanism work?')">Transformers explained</div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Input Zone -->
-    <div class="input-zone">
-      <div class="input-inner">
-        <div class="input-bar">
-          <border-beam size="260" duration="6" border-width="1.5"></border-beam>
-          <textarea id="inp" rows="1" placeholder="Ask anything…" autocomplete="off" spellcheck="true"></textarea>
-          <button class="send" id="send-btn" onclick="sendMsg()" title="Send (Enter)" aria-label="Send message">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
-        </div>
-        <div class="input-hint">
-          <kbd>↵ Enter</kbd> to send &nbsp;·&nbsp; <kbd>⇧ Shift + ↵</kbd> for newline
-        </div>
-      </div>
-    </div>
-
-  </main>
+    <button class="voice-action-btn send" onclick="submitVoiceSpeech()" title="Send to Lumen AI" aria-label="Send to Lumen AI">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </button>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     APPLICATION CLIENT LOGIC
+     ONE REVERSIBLE INK-SPILL ANIMATION TIMELINE & APP SCRIPT
 ═══════════════════════════════════════════ -->
 <script>
-/* ═══════════════════════════════════════════
-   MAGIC UI BORDER BEAM WEB COMPONENT & HELPER
-═══════════════════════════════════════════ */
-class BorderBeamElement extends HTMLElement {
-  connectedCallback() {
-    if (this.querySelector('.border-beam-container')) return;
-
-    const size = this.getAttribute('size') || '240';
-    const duration = this.getAttribute('duration') || '6';
-    const borderWidth = this.getAttribute('border-width') || '1.5';
-    const colorFrom = this.getAttribute('color-from');
-    const colorTo = this.getAttribute('color-to');
-    const reverse = this.hasAttribute('reverse') && this.getAttribute('reverse') !== 'false';
-    const delay = this.getAttribute('delay') || '0';
-
-    const container = document.createElement('div');
-    container.className = 'border-beam-container';
-    container.setAttribute('aria-hidden', 'true');
-    if (borderWidth) container.style.setProperty('--border-beam-width', `${borderWidth}px`);
-
-    const line = document.createElement('div');
-    line.className = `border-beam-line${reverse ? ' reverse' : ''}`;
-    if (size) line.style.setProperty('--border-beam-size', `${size}px`);
-    if (duration) line.style.setProperty('--border-beam-duration', `${duration}s`);
-    if (delay) line.style.setProperty('--border-beam-delay', `${delay}s`);
-    if (colorFrom) line.style.setProperty('--border-beam-color-from', colorFrom);
-    if (colorTo) line.style.setProperty('--border-beam-color-to', colorTo);
-
-    container.appendChild(line);
-    this.appendChild(container);
-  }
-}
-if (!customElements.get('border-beam')) {
-  customElements.define('border-beam', BorderBeamElement);
-}
-
-function createBorderBeam(container, options = {}) {
-  const el = document.createElement('border-beam');
-  if (options.size) el.setAttribute('size', options.size);
-  if (options.duration) el.setAttribute('duration', options.duration);
-  if (options.borderWidth) el.setAttribute('border-width', options.borderWidth);
-  if (options.colorFrom) el.setAttribute('color-from', options.colorFrom);
-  if (options.colorTo) el.setAttribute('color-to', options.colorTo);
-  if (options.reverse) el.setAttribute('reverse', '');
-  if (options.delay) el.setAttribute('delay', options.delay);
-  container.appendChild(el);
-  return el;
-}
-
-/* ── Configuration & Session Storage ── */
+const themeStorageKey = 'lumen-theme';
 const API = '/chat';
 const STORAGE_KEY = 'lumen_session_chats';
 
-/* ── State ── */
 let busy = false;
 let currentChatId = null;
 let sessionChats = [];
 
-/* ── Session Storage Functions (Tab-bound only) ── */
+/* DOM Elements */
+const $ = id => document.getElementById(id);
+const lightLayer     = $('light-layer');
+const darkLayer      = $('dark-layer');
+const maskPathEl     = $('ink-mask-path');
+const optionsPopover = $('options-popover');
+const voiceViewEl    = $('voice-view');
+const voiceTranscript = $('voice-transcription');
+const voiceStatusText = $('voice-status-text');
+
+function getInitialTheme() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeParam = urlParams.get('theme');
+    if (themeParam === 'light' || themeParam === 'dark') return themeParam;
+  } catch (e) {}
+  try {
+    const saved = localStorage.getItem(themeStorageKey);
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch (e) {}
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  return 'light';
+}
+
+/* ═══════════════════════════════════════════
+   ONE REVERSIBLE LIQUID INK TIMELINE SYSTEM
+═══════════════════════════════════════════ */
+let progress = getInitialTheme() === 'dark' ? 1.0 : 0.0;
+let targetProgress = progress;
+let startProgress = progress;
+let animStartTime = null;
+let animDuration = 1050;
+let animId = null;
+let cachedOrigin = null;
+const TRANSITION_DURATION = 1050; // ms (smooth 900-1200ms range)
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function updateThemeIcons(p) {
+  const isDark = p > 0.5;
+  document.querySelectorAll('.theme-moon-icon').forEach(el => {
+    el.style.display = isDark ? 'none' : 'block';
+  });
+  document.querySelectorAll('.theme-sun-icon').forEach(el => {
+    el.style.display = isDark ? 'block' : 'none';
+  });
+
+  const sidebar = $('sidebar');
+  if (sidebar) {
+    if (isDark) sidebar.classList.add('dark-sidebar');
+    else sidebar.classList.remove('dark-sidebar');
+  }
+
+  if (voiceViewEl) {
+    if (isDark) voiceViewEl.classList.add('dark-mode-voice');
+    else voiceViewEl.classList.remove('dark-mode-voice');
+  }
+
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+}
+
+function updateMask(p) {
+  if (p <= 0.0001) {
+    maskPathEl.setAttribute('d', '');
+    darkLayer.style.pointerEvents = 'none';
+    lightLayer.style.pointerEvents = 'auto';
+    return;
+  }
+
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  // Find position of the active theme toggle button (cached during animation to avoid layout reflows)
+  if (!cachedOrigin) {
+    const toggleBtn = document.querySelector(p > 0.5 ? '.layer-dark .theme-toggle-btn' : '.layer-light .theme-toggle-btn') || document.querySelector('.theme-toggle-btn');
+    const rect = toggleBtn ? toggleBtn.getBoundingClientRect() : { left: W - 58, top: 18, width: 34, height: 34 };
+    cachedOrigin = {
+      ox: rect.left + rect.width / 2,
+      oy: rect.top + rect.height / 2
+    };
+  }
+  const { ox, oy } = cachedOrigin;
+
+  // Maximum corner distance plus generous margin so turbulence filter never leaves gaps at p = 1.0
+  const maxCornerDist = Math.max(
+    Math.hypot(ox, oy),
+    Math.hypot(W - ox, oy),
+    Math.hypot(ox, H - oy),
+    Math.hypot(W - ox, H - oy)
+  );
+  const maxR = maxCornerDist * 1.48 + 120;
+
+  if (p >= 0.9999) {
+    // Guaranteed complete viewport coverage
+    maskPathEl.setAttribute('d', `M -150 -150 H ${W + 300} V ${H + 300} H -150 Z`);
+    darkLayer.style.pointerEvents = 'auto';
+    lightLayer.style.pointerEvents = 'none';
+    return;
+  }
+
+  const e = easeInOutCubic(p);
+  const R = e * maxR;
+
+  // Construct deterministic multi-lobed organic fluid shape
+  const N = 56;
+  const pts = [];
+  for (let i = 0; i < N; i++) {
+    const theta = (i / N) * Math.PI * 2;
+    // Harmonic lobes creating natural liquid viscous tendrils
+    const wobble = 1
+      + 0.16 * Math.sin(3 * theta + 0.8)
+      + 0.11 * Math.cos(5 * theta - 1.2)
+      + 0.07 * Math.sin(7 * theta + 2.3)
+      + 0.04 * Math.cos(11 * theta * (1 - 0.4 * e));
+    const r = R * wobble;
+    pts.push({
+      x: ox + Math.cos(theta) * r,
+      y: oy + Math.sin(theta) * r
+    });
+  }
+
+  let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < N; i++) {
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % N];
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+    d += ` Q ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+  }
+  d += ' Z';
+
+  // Satellite ink droplets orbiting the wavefront
+  const numDrops = 10;
+  for (let i = 0; i < numDrops; i++) {
+    const angle = (i / numDrops) * Math.PI * 2 + 0.4;
+    const dist = R * (1.10 + 0.09 * Math.sin(i * 3.4));
+    const dropR = Math.max(0, R * 0.14 * (1 - 0.45 * e));
+    if (dist < maxR && dropR > 1.2) {
+      const dx = ox + Math.cos(angle) * dist;
+      const dy = oy + Math.sin(angle) * dist;
+      d += ` M ${dx.toFixed(1)} ${dy.toFixed(1)} m -${dropR.toFixed(1)},0 a ${dropR.toFixed(1)},${dropR.toFixed(1)} 0 1,0 ${(dropR * 2).toFixed(1)},0 a ${dropR.toFixed(1)},${dropR.toFixed(1)} 0 1,0 -${(dropR * 2).toFixed(1)},0`;
+    }
+  }
+
+  maskPathEl.setAttribute('d', d);
+
+  // During transition, pointer events are mediated safely
+  if (p < 0.5) {
+    darkLayer.style.pointerEvents = 'none';
+    lightLayer.style.pointerEvents = 'auto';
+  } else {
+    darkLayer.style.pointerEvents = 'auto';
+    lightLayer.style.pointerEvents = 'none';
+  }
+}
+
+function animationTimelineStep(timestamp) {
+  if (!animStartTime) animStartTime = timestamp;
+  const elapsed = timestamp - animStartTime;
+  const alpha = Math.min(Math.max(elapsed / animDuration, 0), 1.0);
+
+  progress = startProgress + (targetProgress - startProgress) * alpha;
+
+  updateMask(progress);
+  updateThemeIcons(progress);
+
+  if (alpha < 1.0) {
+    animId = requestAnimationFrame(animationTimelineStep);
+  } else {
+    progress = targetProgress;
+    updateMask(progress);
+    updateThemeIcons(progress);
+    animId = null;
+    animStartTime = null;
+    cachedOrigin = null;
+    try {
+      localStorage.setItem(themeStorageKey, progress > 0.5 ? 'dark' : 'light');
+    } catch (_) {}
+  }
+}
+
+function toggleTheme() {
+  // Respect prefers-reduced-motion
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    setDirectTheme(targetProgress === 0.0);
+    return;
+  }
+
+  // Smoothly flip target: if currently at 0 or moving to 0, target becomes 1; else 0
+  const newTarget = (targetProgress === 0.0) ? 1.0 : 0.0;
+
+  if (animId) {
+    cancelAnimationFrame(animId);
+    animId = null;
+  }
+
+  startProgress = progress;
+  targetProgress = newTarget;
+  animStartTime = null;
+  const delta = Math.abs(targetProgress - startProgress);
+  animDuration = Math.max(delta * TRANSITION_DURATION, 120);
+
+  // Recache toggle button center coordinates
+  const W = window.innerWidth;
+  const toggleBtn = document.querySelector(startProgress > 0.5 ? '.layer-dark .theme-toggle-btn' : '.layer-light .theme-toggle-btn') || document.querySelector('.theme-toggle-btn');
+  const rect = toggleBtn ? toggleBtn.getBoundingClientRect() : { left: W - 58, top: 18, width: 34, height: 34 };
+  cachedOrigin = {
+    ox: rect.left + rect.width / 2,
+    oy: rect.top + rect.height / 2
+  };
+
+  animId = requestAnimationFrame(animationTimelineStep);
+}
+
+function setDirectTheme(isDark) {
+  if (animId) {
+    cancelAnimationFrame(animId);
+    animId = null;
+    animStartTime = null;
+  }
+  progress = isDark ? 1.0 : 0.0;
+  targetProgress = progress;
+  startProgress = progress;
+  cachedOrigin = null;
+  updateMask(progress);
+  updateThemeIcons(progress);
+  try {
+    localStorage.setItem(themeStorageKey, isDark ? 'dark' : 'light');
+  } catch (_) {}
+}
+
+window.addEventListener('resize', () => {
+  cachedOrigin = null;
+  updateMask(progress);
+});
+
+/* ═══════════════════════════════════════════
+   SYNCHRONIZATION BETWEEN LIGHT AND DARK LAYERS
+═══════════════════════════════════════════ */
+function handleInputSync(source) {
+  const val = source.value;
+  source.style.height = 'auto';
+  source.style.height = Math.min(source.scrollHeight, 140) + 'px';
+
+  document.querySelectorAll('textarea.msg-input').forEach(inp => {
+    if (inp !== source) {
+      inp.value = val;
+      inp.style.height = source.style.height;
+    }
+  });
+
+  const hasText = val.trim().length > 0;
+  document.querySelectorAll('.composer-btn-send').forEach(btn => {
+    if (hasText) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+}
+
+function syncStageScroll(source) {
+  const otherStage = source.classList.contains('stage-light')
+    ? document.querySelector('.stage-dark')
+    : document.querySelector('.stage-light');
+  if (otherStage && Math.abs(otherStage.scrollTop - source.scrollTop) > 2) {
+    otherStage.scrollTop = source.scrollTop;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SESSION-ONLY CHAT STORAGE (TAB BOUND)
+═══════════════════════════════════════════ */
 function loadSessionChats() {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
@@ -1923,11 +2459,14 @@ function saveSessionChats() {
   } catch (e) {}
 }
 
-/* ── Sidebar Drawer Open / Close ── */
+/* ═══════════════════════════════════════════
+   SIDEBAR DRAWER MANAGEMENT
+═══════════════════════════════════════════ */
 function toggleSidebar(forceState) {
   const sidebar = $('sidebar');
   const backdrop = $('sidebar-backdrop');
   if (!sidebar || !backdrop) return;
+
   const isOpen = (typeof forceState === 'boolean') ? forceState : !sidebar.classList.contains('open');
   if (isOpen) {
     sidebar.classList.add('open');
@@ -1938,7 +2477,6 @@ function toggleSidebar(forceState) {
   }
 }
 
-/* ── Render Chat List in Sidebar (with Search Filter) ── */
 function renderSidebarChatList(filterQuery = '') {
   const listEl = $('sidebar-chat-list');
   if (!listEl) return;
@@ -2004,49 +2542,38 @@ function renderSidebarChatList(filterQuery = '') {
   });
 }
 
-/* ── Switch Conversation ── */
 function switchChat(chatId) {
   if (busy) return;
   const target = sessionChats.find(c => c.id === chatId);
   if (!target) return;
 
   currentChatId = chatId;
-  msgsEl.innerHTML = '';
-  dismissEmpty();
+  document.querySelectorAll('.messages-container').forEach(c => c.innerHTML = '');
 
   if (Array.isArray(target.messages) && target.messages.length > 0) {
+    document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'none');
     target.messages.forEach(m => {
-      renderMsg(m.role, m.text, m.isErr || false, m.time);
+      renderMessage(m.role, m.text, m.isErr || false, m.time);
     });
   } else {
-    showEmptyState();
+    document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'flex');
   }
 
   renderSidebarChatList($('sidebar-search-input')?.value || '');
-  if (window.innerWidth <= 680) {
-    toggleSidebar(false);
-  }
-  inpEl.focus();
+  if (window.innerWidth <= 640) toggleSidebar(false);
+  focusActiveInput();
 }
 
-/* ── Start New Chat ── */
 function startNewChat(fromSidebar = false) {
   if (busy) return;
   currentChatId = null;
-  msgsEl.innerHTML = '';
-  showEmptyState();
+  document.querySelectorAll('.messages-container').forEach(c => c.innerHTML = '');
+  document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'flex');
   renderSidebarChatList($('sidebar-search-input')?.value || '');
-  if (fromSidebar && window.innerWidth <= 680) {
-    toggleSidebar(false);
-  }
-  inpEl.focus();
+  if (fromSidebar && window.innerWidth <= 640) toggleSidebar(false);
+  focusActiveInput();
 }
 
-function newChat() {
-  startNewChat(false);
-}
-
-/* ── Delete a Single Chat ── */
 function deleteChat(chatId) {
   sessionChats = sessionChats.filter(c => c.id !== chatId);
   saveSessionChats();
@@ -2058,7 +2585,6 @@ function deleteChat(chatId) {
   }
 }
 
-/* ── Clear All Chats ── */
 function clearAllChats() {
   if (sessionChats.length === 0) return;
   if (!confirm('Clear all conversation history in this session?')) return;
@@ -2069,12 +2595,9 @@ function clearAllChats() {
   startNewChat(false);
 }
 
-/* ── Search Chats ── */
 function handleSearch(val) {
   const clearBtn = $('search-clear-btn');
-  if (clearBtn) {
-    clearBtn.style.display = val.trim() ? 'block' : 'none';
-  }
+  if (clearBtn) clearBtn.style.display = val.trim() ? 'block' : 'none';
   renderSidebarChatList(val);
 }
 
@@ -2084,36 +2607,44 @@ function clearSearch() {
   handleSearch('');
 }
 
-/* ── DOM References ── */
-const $ = id => document.getElementById(id);
-const msgsEl    = $('messages');
-const scrollEl  = $('scroll-area');
-const inpEl     = $('inp');
-const sendBtnEl = $('send-btn');
-const themeCb   = $('theme-checkbox');
+function focusActiveInput() {
+  const activeInput = progress > 0.5
+    ? document.querySelector('.msg-input-dark')
+    : document.querySelector('.msg-input-light');
+  if (activeInput) activeInput.focus();
+}
 
-/* ── Textarea Autogrow ── */
-inpEl.addEventListener('input', () => {
-  inpEl.style.height = 'auto';
-  inpEl.style.height = Math.min(inpEl.scrollHeight, 150) + 'px';
-});
+/* ═══════════════════════════════════════════
+   OPTIONS POPOVER
+═══════════════════════════════════════════ */
+function toggleOptionsMenu(e) {
+  e.stopPropagation();
+  optionsPopover.classList.toggle('open');
+}
 
-/* ── Keyboard Shortcuts (Enter / Shift+Enter) ── */
-inpEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    if (!busy) sendMsg();
+function closeOptionsMenu() {
+  optionsPopover.classList.remove('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!optionsPopover.contains(e.target) && !e.target.closest('.options-btn')) {
+    closeOptionsMenu();
   }
 });
 
-/* ── Scroll Helper ── */
-function scrollBottom() {
-  requestAnimationFrame(() => {
-    scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: 'smooth' });
-  });
+async function checkApiHealth() {
+  try {
+    const res = await fetch('/health');
+    const data = await res.json();
+    alert(`Lumen AI Health Check:\n\nStatus: ${data.status}\nAPI Configured: ${data.api_configured}\nActive Models: ${data.models ? data.models.join(', ') : 'Ready'}`);
+  } catch (e) {
+    alert('Could not contact backend health check: ' + e.message);
+  }
 }
 
-/* ── Utility Helpers ── */
+/* ═══════════════════════════════════════════
+   MESSAGE RENDERING & SANITIZATION
+═══════════════════════════════════════════ */
 const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 function esc(s) {
@@ -2124,38 +2655,6 @@ function esc(s) {
           .replace(/'/g, '&#039;');
 }
 
-function dismissEmpty() {
-  const el = $('empty-state');
-  if (el) el.remove();
-}
-
-/* ── Show Empty State ── */
-function showEmptyState() {
-  if ($('empty-state')) return;
-  const empty = document.createElement('div');
-  empty.id = 'empty-state';
-  empty.className = 'empty';
-  empty.innerHTML = `
-    <div class="empty-gem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-        <path d="M2 17l10 5 10-5"/>
-        <path d="M2 12l10 5 10-5"/>
-      </svg>
-    </div>
-    <h1 class="empty-h">Ask <em>anything.</em></h1>
-    <p class="empty-p">Deep reasoning, precise writing, creative thinking — built for engineers and creators who demand more.</p>
-    <div class="chips">
-      <div class="chip" onclick="suggest('Explain the CAP theorem in distributed systems')">CAP theorem</div>
-      <div class="chip" onclick="suggest('Write a cinematic short story about solitude on Mars')">Story about Mars</div>
-      <div class="chip" onclick="suggest('Best practices for a production Node.js REST API')">Node.js API</div>
-      <div class="chip" onclick="suggest('Design a 6-day PPL hypertrophy workout split')">Hypertrophy plan</div>
-      <div class="chip" onclick="suggest('How does transformer attention mechanism work?')">Transformers explained</div>
-    </div>`;
-  msgsEl.appendChild(empty);
-}
-
-/* ── DOMPurify Link Configuration ── */
 if (typeof DOMPurify !== 'undefined') {
   DOMPurify.addHook('afterSanitizeAttributes', function(node) {
     if (node.tagName === 'A') {
@@ -2165,8 +2664,95 @@ if (typeof DOMPurify !== 'undefined') {
   });
 }
 
-/* ── Clipboard Copy with Fallback ── */
-function copyResponse(text, btn) {
+function scrollBottom() {
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.stage').forEach(st => {
+      st.scrollTo({ top: st.scrollHeight, behavior: 'smooth' });
+    });
+  });
+}
+
+function renderMessage(role, text, isErr = false, customTime = null) {
+  document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'none');
+  const isUser = role === 'user';
+
+  // Construct message row
+  function createRow(layerType) {
+    const row = document.createElement('div');
+    row.className = `msg-row ${isUser ? 'user' : 'ai'}`;
+
+    const av = document.createElement('div');
+    av.className = `msg-avatar ${isUser ? 'user' : 'ai'}`;
+    if (isUser) {
+      av.innerHTML = `<img class="msg-avatar-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=128&auto=format&fit=crop&q=80" alt="User" onerror="this.onerror=null; this.src='https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg';" />`;
+    } else {
+      av.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/>
+        </svg>
+      `;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-bubble-wrap';
+
+    const bub = document.createElement('div');
+    bub.className = `msg-bubble ${isUser ? 'user' : (isErr ? 'error' : 'ai')}`;
+
+    if (!isUser && !isErr && typeof marked !== 'undefined') {
+      const rawHtml = marked.parse(text);
+      const cleanHtml = (typeof DOMPurify !== 'undefined')
+        ? DOMPurify.sanitize(rawHtml, {
+            ALLOWED_TAGS: [
+              'p', 'br', 'strong', 'em', 'b', 'i', 'code', 'pre', 'blockquote',
+              'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a',
+              'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'span', 'del', 'sup', 'sub'
+            ],
+            ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'title'],
+            ALLOW_DATA_ATTR: false
+          })
+        : esc(text).replace(/\n/g, '<br>');
+
+      bub.innerHTML = `<div class="md-content">${cleanHtml}</div>`;
+    } else {
+      bub.innerHTML = esc(text).replace(/\n/g, '<br>');
+    }
+
+    if (!isUser && !isErr) {
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'msg-copy-btn';
+      copyBtn.setAttribute('type', 'button');
+      copyBtn.setAttribute('aria-label', 'Copy response');
+      copyBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>Copy`;
+      copyBtn.onclick = () => copyResponseText(text, copyBtn);
+      bub.appendChild(copyBtn);
+    }
+
+    const ts = document.createElement('div');
+    ts.className = 'msg-timestamp';
+    ts.textContent = customTime || now();
+
+    wrap.appendChild(bub);
+    wrap.appendChild(ts);
+    row.appendChild(av);
+    row.appendChild(wrap);
+    return row;
+  }
+
+  const lightRow = createRow('light');
+  const darkRow = createRow('dark');
+
+  document.querySelector('.messages-light')?.appendChild(lightRow);
+  document.querySelector('.messages-dark')?.appendChild(darkRow);
+
+  scrollBottom();
+}
+
+function copyResponseText(text, btn) {
   const onSuccess = () => {
     btn.classList.add('copied');
     btn.innerHTML = `
@@ -2184,9 +2770,7 @@ function copyResponse(text, btn) {
   };
 
   if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text).then(onSuccess).catch(() => {
-      fallbackCopy(text, onSuccess);
-    });
+    navigator.clipboard.writeText(text).then(onSuccess).catch(() => fallbackCopy(text, onSuccess));
   } else {
     fallbackCopy(text, onSuccess);
   }
@@ -2198,10 +2782,7 @@ function fallbackCopy(text, onSuccess) {
     ta.value = text;
     ta.style.position = 'fixed';
     ta.style.left = '-9999px';
-    ta.style.top = '-9999px';
-    ta.setAttribute('readonly', '');
     document.body.appendChild(ta);
-    ta.focus();
     ta.select();
     const ok = document.execCommand('copy');
     document.body.removeChild(ta);
@@ -2209,120 +2790,67 @@ function fallbackCopy(text, onSuccess) {
   } catch (_) {}
 }
 
-/* ── Message Renderer ── */
-function renderMsg(role, text, isErr = false, customTime = null) {
-  dismissEmpty();
-  const isUser = role === 'user';
-
-  const row = document.createElement('div');
-  row.className = `msg-row ${isUser ? 'user' : 'ai'}`;
-
-  // Avatar
-  const av = document.createElement('div');
-  av.className = `av ${isUser ? 'av-user' : 'av-ai'}`;
-  if (isUser) {
-    av.textContent = 'U';
-  } else {
-    av.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`;
-  }
-
-  // Column
-  const col = document.createElement('div');
-  col.className = 'bub-col';
-
-  // Bubble
-  const bub = document.createElement('div');
-  const bubClass = isUser ? 'bub-user' : (isErr ? 'bub-err' : 'bub-ai');
-  bub.className = `bub ${bubClass}`;
-
-  // Render sanitized markdown for AI, escaped text for user
-  if (!isUser && !isErr && typeof marked !== 'undefined') {
-    const rawHtml = marked.parse(text);
-    const cleanHtml = (typeof DOMPurify !== 'undefined')
-      ? DOMPurify.sanitize(rawHtml, {
-          ALLOWED_TAGS: [
-            'p', 'br', 'strong', 'em', 'b', 'i', 'code', 'pre', 'blockquote',
-            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a',
-            'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'span', 'del', 'sup', 'sub'
-          ],
-          ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'title'],
-          ALLOW_DATA_ATTR: false
-        })
-      : esc(text).replace(/\n/g, '<br>');
-    bub.innerHTML = `<div class="md-body">${cleanHtml}</div>`;
-  } else {
-    bub.innerHTML = esc(text).replace(/\n/g, '<br>');
-  }
-
-  // Copy button for AI replies
-  if (!isUser && !isErr) {
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'copy-btn';
-    copyBtn.setAttribute('type', 'button');
-    copyBtn.setAttribute('aria-label', 'Copy response');
-    copyBtn.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-      </svg>Copy`;
-    copyBtn.addEventListener('click', () => copyResponse(text, copyBtn));
-    bub.appendChild(copyBtn);
-  }
-
-  const ts = document.createElement('div');
-  ts.className = 'ts';
-  ts.textContent = customTime || now();
-
-  col.appendChild(bub);
-  col.appendChild(ts);
-  row.appendChild(av);
-  row.appendChild(col);
-  msgsEl.appendChild(row);
-  scrollBottom();
-}
-
-/* ── Typing Indicator ── */
+/* Typing Indicator */
 function showTyping() {
-  if ($('typing')) return;
-  const row = document.createElement('div');
-  row.id = 'typing';
-  row.className = 'typing-row';
+  if (document.querySelector('.typing-row')) return;
 
-  const av = document.createElement('div');
-  av.className = 'av av-ai';
-  av.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`;
+  function createTypingRow() {
+    const row = document.createElement('div');
+    row.className = 'typing-row';
 
-  const bub = document.createElement('div');
-  bub.className = 'typing-bub';
-  bub.innerHTML = '<div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>';
+    const av = document.createElement('div');
+    av.className = 'msg-avatar ai';
+    av.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/>
+      </svg>
+    `;
 
-  row.appendChild(av);
-  row.appendChild(bub);
-  msgsEl.appendChild(row);
+    const bub = document.createElement('div');
+    bub.className = 'typing-bubble';
+    bub.innerHTML = `
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    `;
+
+    row.appendChild(av);
+    row.appendChild(bub);
+    return row;
+  }
+
+  document.querySelector('.messages-light')?.appendChild(createTypingRow());
+  document.querySelector('.messages-dark')?.appendChild(createTypingRow());
+
   scrollBottom();
 }
 
 function hideTyping() {
-  const el = $('typing');
-  if (el) el.remove();
+  document.querySelectorAll('.typing-row').forEach(el => el.remove());
 }
 
-/* ── Loading State ── */
 function setLoading(state) {
   busy = state;
-  sendBtnEl.disabled = state;
-  inpEl.disabled = state;
+  document.querySelectorAll('.composer-btn-send').forEach(btn => btn.disabled = state);
+  document.querySelectorAll('textarea.msg-input').forEach(inp => inp.disabled = state);
 }
 
-/* ── Send Message (Single-Turn API + Session History) ── */
-async function sendMsg() {
-  const text = inpEl.value.trim();
+/* ═══════════════════════════════════════════
+   MESSAGE SUBMISSION & BACKEND API CALL
+═══════════════════════════════════════════ */
+async function submitMessage() {
+  const activeInput = progress > 0.5
+    ? document.querySelector('.msg-input-dark')
+    : document.querySelector('.msg-input-light');
+  const text = (activeInput?.value || '').trim();
   if (!text || busy) return;
 
-  inpEl.value = '';
-  inpEl.style.height = 'auto';
+  document.querySelectorAll('textarea.msg-input').forEach(inp => {
+    inp.value = '';
+    inp.style.height = 'auto';
+  });
+  document.querySelectorAll('.composer-btn-send').forEach(btn => btn.classList.remove('active'));
 
-  // If no active chat session, create one
   if (!currentChatId) {
     const newId = 'chat_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
     let title = text.length > 34 ? text.slice(0, 34).trim() + '…' : text;
@@ -2342,8 +2870,7 @@ async function sendMsg() {
   const activeChat = sessionChats.find(c => c.id === currentChatId);
   const msgTime = now();
 
-  // Render and store user message
-  renderMsg('user', text, false, msgTime);
+  renderMessage('user', text, false, msgTime);
   if (activeChat) {
     activeChat.messages.push({ role: 'user', text: text, time: msgTime });
     saveSessionChats();
@@ -2353,7 +2880,6 @@ async function sendMsg() {
   showTyping();
 
   try {
-    // Single-turn request: send only the current message, no multi-turn backend memory!
     const res = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2367,13 +2893,9 @@ async function sendMsg() {
 
     if (!res.ok) {
       let errMsg = `Request failed (${res.status})`;
-      if (data && data.error) {
-        errMsg = data.error;
-      } else if (res.status === 429) {
-        errMsg = 'Rate limit exceeded. Please wait a moment.';
-      } else if (res.status === 503) {
-        errMsg = 'AI service temporarily unavailable. Please try again.';
-      }
+      if (data && data.error) errMsg = data.error;
+      else if (res.status === 429) errMsg = 'Rate limit exceeded. Please wait a moment.';
+      else if (res.status === 503) errMsg = 'AI service temporarily unavailable. Please try again.';
       throw new Error(errMsg);
     }
 
@@ -2382,9 +2904,8 @@ async function sendMsg() {
     }
 
     const aiTime = now();
-    renderMsg('ai', data.reply, false, aiTime);
+    renderMessage('ai', data.reply, false, aiTime);
 
-    // Save AI reply into the current session chat
     if (activeChat) {
       activeChat.messages.push({ role: 'ai', text: data.reply, time: aiTime });
       saveSessionChats();
@@ -2392,32 +2913,155 @@ async function sendMsg() {
 
   } catch (err) {
     const msg = (err.message && (err.message.includes('fetch') || err.message.includes('Failed to fetch')))
-      ? 'Cannot connect to server. Is it running?'
+      ? 'Cannot connect to server. Is it running locally?'
       : err.message;
-    renderMsg('ai', '⚠ ' + msg, true);
+    renderMessage('ai', '⚠ ' + msg, true);
   } finally {
     hideTyping();
     setLoading(false);
-    inpEl.focus();
+    focusActiveInput();
   }
 }
 
-/* ── Suggestion Click ── */
-function suggest(text) {
+function sendPrompt(text) {
   if (busy) return;
-  inpEl.value = text;
-  inpEl.style.height = 'auto';
-  inpEl.style.height = Math.min(inpEl.scrollHeight, 150) + 'px';
-  sendMsg();
+  document.querySelectorAll('textarea.msg-input').forEach(inp => {
+    inp.value = text;
+    inp.style.height = 'auto';
+    inp.style.height = Math.min(inp.scrollHeight, 140) + 'px';
+  });
+  submitMessage();
 }
 
-/* ── Viewport & Mobile Keyboard Handling ── */
+function triggerAttachment() {
+  alert('Attachment upload: File attachments will be available in the next release.');
+}
+
+document.querySelectorAll('textarea.msg-input').forEach(inp => {
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!busy) submitMessage();
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════
+   VOICE INTERFACE LOGIC
+═══════════════════════════════════════════ */
+let voiceRecognition = null;
+let isRecordingVoice = false;
+let spokenTextAccumulator = '';
+
+function initSpeechRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return null;
+
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    isRecordingVoice = true;
+    voiceStatusText.textContent = 'Listening...';
+    voiceTranscript.classList.add('active-speech');
+  };
+
+  recognition.onresult = (event) => {
+    let interim = '';
+    let final = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += transcript;
+      else interim += transcript;
+    }
+    const current = (final || interim || '').trim();
+    if (current) {
+      spokenTextAccumulator = current;
+      voiceTranscript.textContent = current;
+    }
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error === 'not-allowed') {
+      voiceStatusText.textContent = 'Microphone access denied';
+    } else {
+      voiceStatusText.textContent = 'Listening...';
+    }
+  };
+
+  recognition.onend = () => {
+    isRecordingVoice = false;
+    if (voiceViewEl.classList.contains('active')) {
+      voiceStatusText.textContent = 'Tap microphone to speak';
+    }
+  };
+
+  return recognition;
+}
+
+function openVoiceMode() {
+  voiceViewEl.classList.add('active');
+  if (progress > 0.5) voiceViewEl.classList.add('dark-mode-voice');
+  else voiceViewEl.classList.remove('dark-mode-voice');
+
+  spokenTextAccumulator = '';
+  voiceTranscript.textContent = 'Listening... Speak naturally or ask anything.';
+  voiceTranscript.classList.remove('active-speech');
+  voiceStatusText.textContent = 'Listening...';
+
+  if (!voiceRecognition) {
+    voiceRecognition = initSpeechRecognition();
+  }
+
+  if (voiceRecognition) {
+    try { voiceRecognition.start(); } catch (_) {}
+  } else {
+    voiceStatusText.textContent = 'Web Speech not supported in this browser';
+    voiceTranscript.textContent = 'Type in your query or click Send to test voice dispatch.';
+  }
+}
+
+function closeVoiceMode() {
+  if (voiceRecognition && isRecordingVoice) {
+    try { voiceRecognition.stop(); } catch (_) {}
+  }
+  voiceViewEl.classList.remove('active');
+}
+
+function toggleVoiceRecording() {
+  if (!voiceRecognition) return;
+  if (isRecordingVoice) {
+    try { voiceRecognition.stop(); } catch (_) {}
+    voiceStatusText.textContent = 'Paused. Tap to resume';
+  } else {
+    try { voiceRecognition.start(); } catch (_) {}
+  }
+}
+
+function cancelVoiceSpeech() {
+  spokenTextAccumulator = '';
+  closeVoiceMode();
+}
+
+function submitVoiceSpeech() {
+  const query = spokenTextAccumulator.trim();
+  closeVoiceMode();
+  if (query) {
+    sendPrompt(query);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   VIEWPORT & MOBILE SAFE AREA
+═══════════════════════════════════════════ */
 if (window.visualViewport) {
   let pendingScroll = false;
   const onViewportChange = () => {
-    const appEl = document.querySelector('.app');
-    if (appEl) {
-      appEl.style.height = `${window.visualViewport.height}px`;
+    const viewportEl = document.querySelector('.app-viewport');
+    if (viewportEl) {
+      viewportEl.style.height = `${window.visualViewport.height}px`;
     }
     if (!pendingScroll) {
       pendingScroll = true;
@@ -2431,45 +3075,55 @@ if (window.visualViewport) {
   window.visualViewport.addEventListener('scroll', onViewportChange);
 }
 
-/* ── Page Load Initialization ── */
+/* ═══════════════════════════════════════════
+   PAGE INITIALIZATION
+═══════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
-  initTheme();
+  updateMask(progress);
+  updateThemeIcons(progress);
   loadSessionChats();
   renderSidebarChatList();
-  if (sessionChats.length > 0) {
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('view') === 'voice') {
+    openVoiceMode();
+  } else if (urlParams.get('sidebar') === '1') {
+    toggleSidebar(true);
+  } else if (urlParams.get('mock') === '1') {
+    renderMessage('user', 'Explain the difference between supervised and unsupervised learning.');
+    renderMessage('ai', '### Supervised vs. Unsupervised Learning\n\n**Supervised Learning** relies on labeled training data:\n- Target output is known (e.g., classification, regression)\n- Example: Spam detection with tagged emails\n\n```python\n# Supervised Linear Regression\nfrom sklearn.linear_model import LinearRegression\nmodel = LinearRegression().fit(X_train, y_train)\n```\n\n**Unsupervised Learning** discovers latent patterns and clusters without labels:\n- Identifies structure, groupings, or dimensionality reductions\n- Example: K-Means clustering, PCA');
+  } else if (sessionChats.length > 0) {
     switchChat(sessionChats[0].id);
   } else {
-    showEmptyState();
+    document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'flex');
   }
-  inpEl.focus();
+
+  focusActiveInput();
 });
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     TOPO FIELD — WebGL Background
-     48px physical grid + animated simplex-noise topographic lines
+     AMBIENT TOPOGRAPHIC FIELD — WebGL Shader (Dual Layers)
 ════════════════════════════════════════════════════════════ -->
 <script>
-(function () {
-  const canvas = document.getElementById('topo-canvas');
+function initTopoShader(canvasId, isDarkLayer) {
+  const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
   const gl = canvas.getContext('webgl', { alpha: true, antialias: true, depth: false });
   if (!gl) return;
 
-  // Vertex shader
   const vsSource = `
     attribute vec2 a_position;
     void main() { gl_Position = vec4(a_position, 0.0, 1.0); }
   `;
 
-  // Fragment shader: rendered with alpha blending across dark and light palettes
   const fsSource = `
     precision highp float;
     uniform vec2  u_resolution;
     uniform float u_time;
     uniform float u_dpr;
-    uniform float u_light;   /* 0.0 = dark, 1.0 = light */
+    uniform float u_dark;
 
     vec3 permute(vec3 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
     float snoise(vec2 v) {
@@ -2484,8 +3138,8 @@ window.addEventListener('DOMContentLoaded', () => {
       vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0))
                              + i.x + vec3(0.0, i1.x, 1.0));
       vec3 m = max(0.5 - vec3(dot(x0,x0),
-                               dot(x12.xy, x12.xy),
-                               dot(x12.zw, x12.zw)), 0.0);
+                                dot(x12.xy, x12.xy),
+                                dot(x12.zw, x12.zw)), 0.0);
       m = m * m; m = m * m;
       vec3 x2 = 2.0 * fract(p * C.www) - 1.0;
       vec3 h  = abs(x2) - 0.5;
@@ -2502,8 +3156,7 @@ window.addEventListener('DOMContentLoaded', () => {
       vec2 st = gl_FragCoord.xy / u_resolution.xy;
       st.x *= u_resolution.x / u_resolution.y;
 
-      /* 1-px physical grid lines */
-      float gridSize  = 48.0 * u_dpr;
+      float gridSize  = 54.0 * u_dpr;
       vec2  gridFract = fract(gl_FragCoord.xy / gridSize);
       float lineW     = 1.0 / gridSize;
       float gridLines = clamp(
@@ -2511,49 +3164,41 @@ window.addEventListener('DOMContentLoaded', () => {
         0.0, 1.0
       );
 
-      /* Topographic contours */
-      float noiseScale = 1.35;
-      vec2  noisePos   = st * noiseScale + vec2(u_time * 0.012, u_time * 0.020);
+      float noiseScale = 1.25;
+      vec2  noisePos   = st * noiseScale + vec2(u_time * 0.010, u_time * 0.018);
       float n          = snoise(noisePos) * 0.5 + 0.5;
-      float bandVal    = n * 9.5;
+      float bandVal    = n * 8.5;
       float triWave    = abs(fract(bandVal) - 0.5) * 2.0;
 
       float gL = gridLines;
       float tL = smoothstep(0.025, 0.00, triWave);
 
-      /* Dark mode: glowing sky cyan lines floating over cosmic gradient */
-      vec3 darkLineColor = vec3(0.22, 0.74, 0.98); /* Sky-blue #38bdf8 */
-      float darkAlpha = (gL * 0.08) + (tL * 0.28);
+      vec3 darkLineColor = vec3(0.90, 0.90, 0.90);
+      float darkAlpha = (gL * 0.025) + (tL * 0.07);
 
-      /* Light mode: crisp deep azure lines floating over bright sky gradient */
-      vec3 lightLineColor = vec3(0.02, 0.42, 0.68); /* #056cb0 */
-      float lightAlpha = (gL * 0.07) + (tL * 0.24);
+      vec3 lightLineColor = vec3(0.51, 0.38, 0.91);
+      float lightAlpha = (gL * 0.04) + (tL * 0.16);
 
-      vec3 lineColor  = mix(darkLineColor, lightLineColor, u_light);
-      float lineAlpha = mix(darkAlpha, lightAlpha, u_light);
+      vec3 lineColor  = mix(lightLineColor, darkLineColor, u_dark);
+      float lineAlpha = mix(lightAlpha, darkAlpha, u_dark);
 
-      /* Premultiplied alpha output */
       gl_FragColor = vec4(lineColor * lineAlpha, lineAlpha);
     }
   `;
 
-  function compileShader(type, src) {
+  function compile(type, src) {
     const s = gl.createShader(type);
     gl.shaderSource(s, src);
     gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-      console.warn('[TopoField] Shader error:', gl.getShaderInfoLog(s));
-    }
     return s;
   }
 
   const prog = gl.createProgram();
-  gl.attachShader(prog, compileShader(gl.VERTEX_SHADER,   vsSource));
-  gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, fsSource));
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, vsSource));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fsSource));
   gl.linkProgram(prog);
   gl.useProgram(prog);
 
-  // Full-screen quad geometry
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
@@ -2561,33 +3206,13 @@ window.addEventListener('DOMContentLoaded', () => {
   gl.enableVertexAttribArray(pos);
   gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
 
-  // Alpha blending configuration
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-  // Uniform locations
-  const uRes   = gl.getUniformLocation(prog, 'u_resolution');
-  const uTime  = gl.getUniformLocation(prog, 'u_time');
-  const uDpr   = gl.getUniformLocation(prog, 'u_dpr');
-  const uLight = gl.getUniformLocation(prog, 'u_light');
-
-  let lightVal = 0.0;
-  let targetLight = 0.0;
-  let lightAnimId = null;
-
-  function setLightMode(isLight) {
-    targetLight = isLight ? 1.0 : 0.0;
-    if (lightAnimId) cancelAnimationFrame(lightAnimId);
-    function step() {
-      lightVal += (targetLight - lightVal) * 0.1;
-      if (Math.abs(targetLight - lightVal) < 0.002) {
-        lightVal = targetLight;
-      } else {
-        lightAnimId = requestAnimationFrame(step);
-      }
-    }
-    step();
-  }
+  const uRes  = gl.getUniformLocation(prog, 'u_resolution');
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uDpr  = gl.getUniformLocation(prog, 'u_dpr');
+  const uDark = gl.getUniformLocation(prog, 'u_dark');
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -2596,51 +3221,37 @@ window.addEventListener('DOMContentLoaded', () => {
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(uRes, canvas.width, canvas.height);
     gl.uniform1f(uDpr, dpr);
+    gl.uniform1f(uDark, isDarkLayer ? 1.0 : 0.0);
   }
   window.addEventListener('resize', resize);
   resize();
 
   const t0 = performance.now();
   let animId = null;
-  let isTabVisible = !document.hidden;
 
-  function render(now) {
-    if (!isTabVisible) {
+  function render(t) {
+    if (document.hidden) {
       animId = null;
       return;
     }
-    gl.clearColor(0.0, 0.0, 0.0, 0.0);
+    gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
-
-    gl.uniform1f(uTime, (now - t0) * 0.001);
-    gl.uniform1f(uLight, lightVal);
+    gl.uniform1f(uTime, (t - t0) * 0.001);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
     animId = requestAnimationFrame(render);
   }
 
   document.addEventListener('visibilitychange', () => {
-    isTabVisible = !document.hidden;
-    if (isTabVisible && !animId) {
+    if (!document.hidden && !animId) {
       animId = requestAnimationFrame(render);
     }
   });
 
   animId = requestAnimationFrame(render);
+}
 
-  // Observe theme changes on <html>
-  const htmlRoot = document.documentElement;
-  function syncTheme() {
-    const isLight = htmlRoot.getAttribute('data-theme') === 'light' || htmlRoot.classList.contains('light');
-    setLightMode(isLight);
-  }
-
-  new MutationObserver(syncTheme).observe(htmlRoot, {
-    attributes: true,
-    attributeFilter: ['data-theme', 'class']
-  });
-  syncTheme();
-})();
+initTopoShader('topo-canvas-light', false);
+initTopoShader('topo-canvas-dark', true);
 </script>
 
 </body>
