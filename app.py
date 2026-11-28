@@ -123,7 +123,7 @@ def get_genai_client() -> Optional[genai.Client]:
         try:
             _client = genai.Client(
                 api_key=api_key,
-                http_options=types.HttpOptions(timeout=15000)
+                http_options=types.HttpOptions(api_version="v1beta", timeout=30000)
             )
             logger.info("Initialized Google GenAI client.")
         except Exception as e:
