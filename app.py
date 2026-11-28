@@ -160,11 +160,6 @@ def index():
     """Serves the main chat application interface."""
     return send_from_directory(BASE_DIR, "index.html")
 
-@app.route("/components/<path:filename>", methods=["GET"])
-def components_static(filename):
-    """Serves static component files safely from the components directory."""
-    return send_from_directory(os.path.join(BASE_DIR, "components"), filename)
-
 @app.route("/health", methods=["GET"])
 def health():
     """

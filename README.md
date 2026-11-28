@@ -39,7 +39,7 @@
 
 ## 🎨 Design & Experience
 
-Lumen AI is built upon an intentional design system defined in [`.agents/skills/brand-identity`](.agents/skills/brand-identity/SKILL.md):
+Lumen AI is built upon an intentional design system:
 
 | Theme Mode | Accent Primary | Background Depth | Surface Elevation |
 | :--- | :--- | :--- | :--- |
@@ -53,7 +53,6 @@ Lumen AI is built upon an intentional design system defined in [`.agents/skills/
 ### Frontend Architecture
 - **Structure & Logic:** Vanilla HTML5 & Modern ES6+ JavaScript
 - **Styling Engine:** Pure CSS Design Tokens, Glassmorphism & Custom Keyframe Shaders
-- **Micro-Components:** Custom Web Components (`<border-beam>`) inspired by Magic UI
 - **Typography:** Cormorant Garamond (Editorial Headings) & DM Sans (UI Body)
 - **Markdown Processor:** Marked.js
 

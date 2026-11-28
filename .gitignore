@@ -1,14 +1,54 @@
+# Python byte-compiled / cache files
 __pycache__/
-*.pyc
-.env
-.vscode/
-venv/
-.venv/
-*.log
-.DS_Store
-.pytest_cache/
+*.py[cod]
+*$py.class
 tests/__pycache__/
-*.png
-*.jpg
-*.jpeg
+
+# Environments & secrets
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# Logs & temporary run files
+*.log
+task-*.log
+*.tmp
+tmp/
+temp/
+uploads/
 scratch/
+
+# IDE & editor directories / files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# AI coding agent docs, instructions & configs
+GEMINI.md
+CLAUDE.md
+AGENTS.md
+COPILOT.md
+PPT_CONTEXT.md
+walkthrough.md
+antigravity-skill-creator.md
+*.md
+!README.md
+
+.claude/
+.gemini/
+.agent/
+.agents/
+.cursor/
+.antigravity/
+.cursorrules
+.windsurfrules
+.clinerules
+
+# Test & coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
