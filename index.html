@@ -935,6 +935,485 @@ textarea.msg-input::placeholder { color: var(--txt-tertiary); }
   height: 18px;
 }
 
+/* ═══════════════════════════════════════════
+   DOCUMENT ATTACHMENT BAR & CHIPS
+═══════════════════════════════════════════ */
+.composer-attachment-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  animation: slideUpFade 0.22s var(--ease-spring);
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 100%;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all var(--t-fast) var(--ease-spring);
+}
+
+.theme-light .attachment-chip,
+[data-theme="light"] .attachment-chip {
+  background: rgba(243, 238, 254, 0.95);
+  border: 1px solid rgba(130, 98, 233, 0.28);
+  color: #191624;
+  box-shadow: 0 4px 14px rgba(130, 98, 233, 0.12);
+}
+
+.theme-dark .attachment-chip,
+[data-theme="dark"] .attachment-chip {
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
+}
+
+.attachment-chip.uploading {
+  opacity: 0.82;
+}
+
+.attachment-icon {
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.attachment-name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-size {
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+.attachment-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(128, 128, 128, 0.18);
+  color: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  margin-left: 2px;
+}
+
+.attachment-remove-btn:hover {
+  background: rgba(239, 68, 68, 0.22);
+  color: #ef4444;
+}
+
+.attachment-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.msg-doc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  background: rgba(0, 0, 0, 0.08);
+}
+.theme-dark .msg-doc-badge {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
+.grounded-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.theme-light .grounded-badge {
+  background: rgba(130, 98, 233, 0.12);
+  color: var(--lavender-700);
+}
+.theme-dark .grounded-badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+}
+
+/* ═══════════════════════════════════════════
+   SOURCE UPLOAD SCREEN & ACTIVE DOC WORKSPACE
+═══════════════════════════════════════════ */
+.source-upload-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 660px;
+  margin: auto;
+  padding: 24px 16px;
+  width: 100%;
+}
+
+.source-upload-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  margin-bottom: 20px;
+}
+.theme-light .source-upload-badge,
+[data-theme="light"] .source-upload-badge {
+  background: rgba(130, 98, 233, 0.08);
+  color: var(--lavender-700);
+  border: 1px solid rgba(130, 98, 233, 0.20);
+}
+.theme-dark .source-upload-badge,
+[data-theme="dark"] .source-upload-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: #D4D4D8;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.source-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.source-upload-heading {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--txt-primary);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+
+.source-upload-desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--txt-secondary);
+  max-width: 520px;
+  margin-bottom: 24px;
+}
+
+.pdf-hero-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto 16px;
+  padding: 18px 22px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--t-normal) var(--ease-spring);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.theme-light .pdf-hero-dropzone,
+[data-theme="light"] .pdf-hero-dropzone {
+  background: rgba(255, 255, 255, 0.90);
+  border: 2px dashed rgba(130, 98, 233, 0.35);
+  box-shadow: 0 8px 24px -4px rgba(130, 98, 233, 0.10);
+}
+
+.theme-light .pdf-hero-dropzone:hover,
+.theme-light .pdf-hero-dropzone.drag-active,
+[data-theme="light"] .pdf-hero-dropzone:hover,
+[data-theme="light"] .pdf-hero-dropzone.drag-active {
+  background: #FFFFFF;
+  border-color: var(--lavender-600);
+  box-shadow: 0 12px 32px -4px rgba(130, 98, 233, 0.20);
+  transform: translateY(-2px);
+}
+
+.theme-dark .pdf-hero-dropzone,
+[data-theme="dark"] .pdf-hero-dropzone {
+  background: #0E0E0E;
+  border: 2px dashed rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.9);
+}
+
+.theme-dark .pdf-hero-dropzone:hover,
+.theme-dark .pdf-hero-dropzone.drag-active,
+[data-theme="dark"] .pdf-hero-dropzone:hover,
+[data-theme="dark"] .pdf-hero-dropzone.drag-active {
+  background: #141414;
+  border-color: #FFFFFF;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 1);
+  transform: translateY(-2px);
+}
+
+.pdf-hero-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.theme-light .pdf-hero-icon {
+  background: rgba(130, 98, 233, 0.10);
+  color: var(--lavender-600);
+}
+.theme-dark .pdf-hero-icon {
+  background: rgba(255, 255, 255, 0.10);
+  color: #FFFFFF;
+}
+.pdf-hero-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.pdf-hero-text {
+  flex: 1;
+  text-align: left;
+}
+.pdf-hero-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--txt-primary);
+  margin-bottom: 3px;
+}
+.pdf-hero-subtitle {
+  font-size: 12px;
+  color: var(--txt-secondary);
+  line-height: 1.35;
+}
+
+.pdf-hero-btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: none;
+  transition: all var(--t-fast);
+}
+.theme-light .pdf-hero-btn {
+  background: var(--btn-purple-bg);
+  color: #FFFFFF;
+  box-shadow: var(--btn-purple-shadow);
+}
+.theme-dark .pdf-hero-btn {
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.18);
+}
+.pdf-hero-btn:hover {
+  transform: scale(1.04);
+}
+
+.source-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  width: 100%;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+}
+.theme-light .feature-item,
+[data-theme="light"] .feature-item {
+  background: rgba(130, 98, 233, 0.04);
+  border: 1px solid rgba(130, 98, 233, 0.08);
+  color: var(--txt-secondary);
+}
+.theme-dark .feature-item,
+[data-theme="dark"] .feature-item {
+  background: #0E0E0E;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #A1A1AA;
+}
+.feature-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── DOCUMENT Q&A VIEW ── */
+.doc-qa-screen {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+}
+
+.doc-welcome-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.active-doc-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 620px;
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+  gap: 14px;
+}
+.theme-light .active-doc-banner,
+[data-theme="light"] .active-doc-banner {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(130, 98, 233, 0.20);
+  box-shadow: 0 4px 20px rgba(130, 98, 233, 0.08);
+}
+.theme-dark .active-doc-banner,
+[data-theme="dark"] .active-doc-banner {
+  background: #0C0C0C;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.9);
+}
+
+.active-doc-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.active-doc-info {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+
+.active-doc-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--txt-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.active-doc-meta {
+  font-size: 11.5px;
+  color: var(--txt-secondary);
+  margin-top: 2px;
+}
+
+.active-doc-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.doc-action-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--t-fast);
+}
+.theme-light .replace-doc-btn {
+  background: rgba(130, 98, 233, 0.08);
+  color: var(--lavender-700);
+  border-color: rgba(130, 98, 233, 0.16);
+}
+.theme-light .replace-doc-btn:hover {
+  background: rgba(130, 98, 233, 0.15);
+}
+.theme-light .remove-doc-btn {
+  background: transparent;
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.20);
+}
+.theme-light .remove-doc-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.theme-dark .replace-doc-btn {
+  background: rgba(255, 255, 255, 0.10);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.theme-dark .replace-doc-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.theme-dark .remove-doc-btn {
+  background: transparent;
+  color: #F87171;
+  border-color: rgba(248, 113, 113, 0.25);
+}
+.theme-dark .remove-doc-btn:hover {
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.doc-prompt-heading {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--txt-tertiary);
+  margin-bottom: 12px;
+  text-align: left;
+  width: 100%;
+  max-width: 620px;
+}
+
 .composer-btn-send {
   width: 34px;
   height: 34px;
@@ -1825,69 +2304,129 @@ textarea.msg-input::placeholder { color: var(--txt-tertiary); }
 
     <main class="stage stage-light" onscroll="syncStageScroll(this)">
       <div class="stage-inner">
-        <section class="home-screen">
-          <div class="ai-orb-wrap" onclick="openVoiceMode()" title="Lumen AI — Click for Voice Mode">
+        <!-- ── SCREEN 1: DEDICATED SOURCE UPLOAD SCREEN (ACTIVE WHEN NO PDF LOADED) ── -->
+        <section class="source-upload-screen">
+          <div class="source-upload-badge">
+            <span class="source-badge-dot"></span>
+            <span>SOURCE-LOCKED DOCUMENT WORKSPACE</span>
+          </div>
+
+          <div class="ai-orb-wrap" title="Lumen AI">
             <div class="ai-orb-glow"></div>
             <div class="ai-orb"></div>
           </div>
-          <div class="greeting-pre">Hello, Jackson</div>
-          <h1 class="greeting-main">How can I assist you today?</h1>
-          <div class="cards-grid">
-            <div class="s-card" onclick="sendPrompt('Synthesize my meeting notes into 5 key bullet points for the team')">
-              <div class="s-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>
-                </svg>
-              </div>
-              <div class="s-card-title">Synthesize Data</div>
-              <div class="s-card-desc">Turn my meeting notes into 5 key bullet points for the team</div>
+
+          <h1 class="source-upload-heading">Lumen Document Intelligence</h1>
+          <p class="source-upload-desc">
+            Upload a PDF document to begin. All responses are strictly grounded in your document with page citations. General chat is disabled.
+          </p>
+
+          <div class="pdf-hero-dropzone" onclick="triggerAttachment(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" role="button" tabindex="0" aria-label="Upload PDF Document">
+            <div class="pdf-hero-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <line x1="9" y1="15" x2="12" y2="12"/>
+                <line x1="15" y1="15" x2="12" y2="12"/>
+              </svg>
             </div>
-            <div class="s-card" onclick="sendPrompt('Generate 3 taglines for a new sustainable fashion brand')">
-              <div class="s-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 18h6"/><path d="M10 22h4"/>
-                  <path d="M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 6h8c1.5-1.5 3-3.5 3-6a7 7 0 0 0-7-7z"/>
-                </svg>
-              </div>
-              <div class="s-card-title">Creative Brainstorm</div>
-              <div class="s-card-desc">Generate 3 taglines for a new sustainable fashion brand</div>
+            <div class="pdf-hero-text">
+              <div class="pdf-hero-title">Drop your PDF here, or click to browse</div>
+              <div class="pdf-hero-subtitle">Upload research papers, reports, or legal docs (.pdf up to 20MB)</div>
             </div>
-            <div class="s-card" onclick="sendPrompt('Compare key differences between GDPR and CCPA')">
-              <div class="s-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path>
-                </svg>
-              </div>
-              <div class="s-card-title">Check Facts</div>
-              <div class="s-card-desc">Compare key differences between GDPR and CCPA</div>
+            <button type="button" class="pdf-hero-btn" onclick="triggerAttachment(event)">Select PDF</button>
+          </div>
+
+          <div class="source-features-grid">
+            <div class="feature-item">
+              <span class="feature-icon">🔒</span>
+              <div class="feature-text"><strong>Zero Hallucination:</strong> Answers strictly from facts in the PDF.</div>
             </div>
-            <div class="s-card" onclick="sendPrompt('Explain complex tech concepts simply and quickly')">
-              <div class="s-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                </svg>
-              </div>
-              <div class="s-card-title">Explain Concept</div>
-              <div class="s-card-desc">Explain complex tech concepts simply and quickly</div>
+            <div class="feature-item">
+              <span class="feature-icon">📍</span>
+              <div class="feature-text"><strong>Exact Citations:</strong> Page numbers and verbatim quotes included.</div>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🚫</span>
+              <div class="feature-text"><strong>Source-Locked:</strong> Out-of-scope queries are explicitly rejected.</div>
             </div>
           </div>
         </section>
-        <div class="messages-container messages-light" aria-live="polite"></div>
+
+        <!-- ── SCREEN 2: DOCUMENT Q&A SCREEN (ACTIVE WHEN PDF IS UPLOADED) ── -->
+        <section class="doc-qa-screen" style="display:none;">
+          <div class="doc-welcome-zone">
+            <div class="active-doc-banner">
+              <div class="active-doc-icon">📄</div>
+              <div class="active-doc-info">
+                <div class="active-doc-name doc-file-name">document.pdf</div>
+                <div class="active-doc-meta"><span class="doc-file-size">0 KB</span> • <span class="doc-status-badge">Locked Source</span></div>
+              </div>
+              <div class="active-doc-actions">
+                <button type="button" class="doc-action-btn replace-doc-btn" onclick="triggerAttachment(event)" title="Replace PDF">Replace PDF</button>
+                <button type="button" class="doc-action-btn remove-doc-btn" onclick="removeAttachment()" title="Detach PDF">Remove</button>
+              </div>
+            </div>
+
+            <div class="doc-prompt-heading">Recommended Document Inquiries:</div>
+            <div class="cards-grid">
+              <div class="s-card" onclick="sendPrompt('Provide an executive summary of this document with key takeaways and conclusions.')">
+                <div class="s-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                </div>
+                <div class="s-card-title">Executive Summary</div>
+                <div class="s-card-desc">Synthesize the main thesis, core findings, and conclusions</div>
+              </div>
+              <div class="s-card" onclick="sendPrompt('What are the most crucial facts, direct quotes, and page citations in this PDF?')">
+                <div class="s-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                </div>
+                <div class="s-card-title">Extract Key Citations</div>
+                <div class="s-card-desc">List the most crucial facts, direct quotes, and page citations</div>
+              </div>
+              <div class="s-card" onclick="sendPrompt('Detail the methodology, experimental setup, or quantitative metrics in this document.')">
+                <div class="s-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>
+                  </svg>
+                </div>
+                <div class="s-card-title">Methodology & Data</div>
+                <div class="s-card-desc">Inspect experimental setup, tables, charts, or quantitative data</div>
+              </div>
+              <div class="s-card" onclick="sendPrompt('What limitations, caveats, risks, or edge cases are stated in the PDF?')">
+                <div class="s-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
+                <div class="s-card-title">Limitations & Risks</div>
+                <div class="s-card-desc">Find stated caveats, constraints, or unanswered questions</div>
+              </div>
+            </div>
+          </div>
+          <div class="messages-container messages-light" aria-live="polite"></div>
+        </section>
       </div>
     </main>
 
-    <div class="composer-zone">
+    <div class="composer-zone" style="display:none;">
       <div class="composer-inner">
+        <div class="composer-attachment-bar composer-attachment-light" style="display:none;"></div>
         <div class="composer-pill">
-          <textarea class="msg-input msg-input-light" rows="1" placeholder="Ask me anything..." autocomplete="off" spellcheck="true" oninput="handleInputSync(this)"></textarea>
+          <textarea class="msg-input msg-input-light" rows="1" placeholder="Ask a question grounded in the uploaded document..." autocomplete="off" spellcheck="true" oninput="handleInputSync(this)"></textarea>
           <div class="composer-tools">
-            <button class="composer-btn-attach" onclick="triggerAttachment()" title="Attach file" aria-label="Attach file">
+            <button class="composer-btn-attach" onclick="triggerAttachment(event)" title="Replace or re-upload PDF" aria-label="Attach file">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
               </svg>
             </button>
-            <button class="composer-btn-send send-btn-light" onclick="submitMessage()" title="Send message" aria-label="Send message">
+            <button class="composer-btn-send send-btn-light" onclick="submitMessage()" title="Send question" aria-label="Send message">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
               </svg>
@@ -1951,69 +2490,129 @@ textarea.msg-input::placeholder { color: var(--txt-tertiary); }
 
     <main class="stage stage-dark" onscroll="syncStageScroll(this)">
       <div class="stage-inner">
-        <section class="home-screen">
-          <div class="ai-orb-wrap" onclick="openVoiceMode()" title="Lumen AI — Click for Voice Mode">
+        <!-- ── SCREEN 1: DEDICATED SOURCE UPLOAD SCREEN (ACTIVE WHEN NO PDF LOADED) ── -->
+        <section class="source-upload-screen">
+          <div class="source-upload-badge">
+            <span class="source-badge-dot"></span>
+            <span>SOURCE-LOCKED DOCUMENT WORKSPACE</span>
+          </div>
+
+          <div class="ai-orb-wrap" title="Lumen AI">
             <div class="ai-orb-glow"></div>
             <div class="ai-orb"></div>
           </div>
-          <div class="greeting-pre">Hello, Jackson</div>
-          <h1 class="greeting-main">How can I assist you today?</h1>
-          <div class="cards-grid">
-            <div class="s-card" onclick="sendPrompt('Synthesize my meeting notes into 5 key bullet points for the team')">
-              <div class="s-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>
-                </svg>
-              </div>
-              <div class="s-card-title">Synthesize Data</div>
-              <div class="s-card-desc">Turn my meeting notes into 5 key bullet points for the team</div>
+
+          <h1 class="source-upload-heading">Lumen Document Intelligence</h1>
+          <p class="source-upload-desc">
+            Upload a PDF document to begin. All responses are strictly grounded in your document with page citations. General chat is disabled.
+          </p>
+
+          <div class="pdf-hero-dropzone" onclick="triggerAttachment(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" role="button" tabindex="0" aria-label="Upload PDF Document">
+            <div class="pdf-hero-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <line x1="9" y1="15" x2="12" y2="12"/>
+                <line x1="15" y1="15" x2="12" y2="12"/>
+              </svg>
             </div>
-            <div class="s-card" onclick="sendPrompt('Generate 3 taglines for a new sustainable fashion brand')">
-              <div class="s-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 18h6"/><path d="M10 22h4"/>
-                  <path d="M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 6h8c1.5-1.5 3-3.5 3-6a7 7 0 0 0-7-7z"/>
-                </svg>
-              </div>
-              <div class="s-card-title">Creative Brainstorm</div>
-              <div class="s-card-desc">Generate 3 taglines for a new sustainable fashion brand</div>
+            <div class="pdf-hero-text">
+              <div class="pdf-hero-title">Drop your PDF here, or click to browse</div>
+              <div class="pdf-hero-subtitle">Upload research papers, reports, or legal docs (.pdf up to 20MB)</div>
             </div>
-            <div class="s-card" onclick="sendPrompt('Compare key differences between GDPR and CCPA')">
-              <div class="s-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path>
-                </svg>
-              </div>
-              <div class="s-card-title">Check Facts</div>
-              <div class="s-card-desc">Compare key differences between GDPR and CCPA</div>
+            <button type="button" class="pdf-hero-btn" onclick="triggerAttachment(event)">Select PDF</button>
+          </div>
+
+          <div class="source-features-grid">
+            <div class="feature-item">
+              <span class="feature-icon">🔒</span>
+              <div class="feature-text"><strong>Zero Hallucination:</strong> Answers strictly from facts in the PDF.</div>
             </div>
-            <div class="s-card" onclick="sendPrompt('Explain complex tech concepts simply and quickly')">
-              <div class="s-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                </svg>
-              </div>
-              <div class="s-card-title">Explain Concept</div>
-              <div class="s-card-desc">Explain complex tech concepts simply and quickly</div>
+            <div class="feature-item">
+              <span class="feature-icon">📍</span>
+              <div class="feature-text"><strong>Exact Citations:</strong> Page numbers and verbatim quotes included.</div>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🚫</span>
+              <div class="feature-text"><strong>Source-Locked:</strong> Out-of-scope queries are explicitly rejected.</div>
             </div>
           </div>
         </section>
-        <div class="messages-container messages-dark" aria-live="polite"></div>
+
+        <!-- ── SCREEN 2: DOCUMENT Q&A SCREEN (ACTIVE WHEN PDF IS UPLOADED) ── -->
+        <section class="doc-qa-screen" style="display:none;">
+          <div class="doc-welcome-zone">
+            <div class="active-doc-banner">
+              <div class="active-doc-icon">📄</div>
+              <div class="active-doc-info">
+                <div class="active-doc-name doc-file-name">document.pdf</div>
+                <div class="active-doc-meta"><span class="doc-file-size">0 KB</span> • <span class="doc-status-badge">Locked Source</span></div>
+              </div>
+              <div class="active-doc-actions">
+                <button type="button" class="doc-action-btn replace-doc-btn" onclick="triggerAttachment(event)" title="Replace PDF">Replace PDF</button>
+                <button type="button" class="doc-action-btn remove-doc-btn" onclick="removeAttachment()" title="Detach PDF">Remove</button>
+              </div>
+            </div>
+
+            <div class="doc-prompt-heading">Recommended Document Inquiries:</div>
+            <div class="cards-grid">
+              <div class="s-card" onclick="sendPrompt('Provide an executive summary of this document with key takeaways and conclusions.')">
+                <div class="s-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                </div>
+                <div class="s-card-title">Executive Summary</div>
+                <div class="s-card-desc">Synthesize the main thesis, core findings, and conclusions</div>
+              </div>
+              <div class="s-card" onclick="sendPrompt('What are the most crucial facts, direct quotes, and page citations in this PDF?')">
+                <div class="s-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                </div>
+                <div class="s-card-title">Extract Key Citations</div>
+                <div class="s-card-desc">List the most crucial facts, direct quotes, and page citations</div>
+              </div>
+              <div class="s-card" onclick="sendPrompt('Detail the methodology, experimental setup, or quantitative metrics in this document.')">
+                <div class="s-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>
+                  </svg>
+                </div>
+                <div class="s-card-title">Methodology & Data</div>
+                <div class="s-card-desc">Inspect experimental setup, tables, charts, or quantitative data</div>
+              </div>
+              <div class="s-card" onclick="sendPrompt('What limitations, caveats, risks, or edge cases are stated in the PDF?')">
+                <div class="s-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
+                <div class="s-card-title">Limitations & Risks</div>
+                <div class="s-card-desc">Find stated caveats, constraints, or unanswered questions</div>
+              </div>
+            </div>
+          </div>
+          <div class="messages-container messages-dark" aria-live="polite"></div>
+        </section>
       </div>
     </main>
 
-    <div class="composer-zone">
+    <div class="composer-zone" style="display:none;">
       <div class="composer-inner">
+        <div class="composer-attachment-bar composer-attachment-dark" style="display:none;"></div>
         <div class="composer-pill">
-          <textarea class="msg-input msg-input-dark" rows="1" placeholder="Ask me anything..." autocomplete="off" spellcheck="true" oninput="handleInputSync(this)"></textarea>
+          <textarea class="msg-input msg-input-dark" rows="1" placeholder="Ask a question grounded in the uploaded document..." autocomplete="off" spellcheck="true" oninput="handleInputSync(this)"></textarea>
           <div class="composer-tools">
-            <button class="composer-btn-attach" onclick="triggerAttachment()" title="Attach file" aria-label="Attach file">
+            <button class="composer-btn-attach" onclick="triggerAttachment(event)" title="Replace or re-upload PDF" aria-label="Attach file">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
               </svg>
             </button>
-            <button class="composer-btn-send send-btn-dark" onclick="submitMessage()" title="Send message" aria-label="Send message">
+            <button class="composer-btn-send send-btn-dark" onclick="submitMessage()" title="Send question" aria-label="Send message">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
               </svg>
@@ -2036,7 +2635,15 @@ textarea.msg-input::placeholder { color: var(--txt-tertiary); }
 <div class="options-popover" id="options-popover">
   <button class="options-item" onclick="startNewChat(false); closeOptionsMenu();">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    <span>New Chat</span>
+    <span>New Document Session</span>
+  </button>
+  <button class="options-item" onclick="triggerAttachment(event); closeOptionsMenu();">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
+    <span>Upload / Replace PDF</span>
+  </button>
+  <button class="options-item" onclick="clearAllChats(); closeOptionsMenu();">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    <span>Clear All Chats</span>
   </button>
   <button class="options-item" onclick="openVoiceMode(); closeOptionsMenu();">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
@@ -2550,15 +3157,26 @@ function switchChat(chatId) {
   currentChatId = chatId;
   document.querySelectorAll('.messages-container').forEach(c => c.innerHTML = '');
 
-  if (Array.isArray(target.messages) && target.messages.length > 0) {
-    document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'none');
-    target.messages.forEach(m => {
-      renderMessage(m.role, m.text, m.isErr || false, m.time);
+  if (target.pdf && target.pdf.fileId) {
+    activeAttachment = { ...target.pdf };
+    renderAttachmentBar({
+      fileName: activeAttachment.fileName,
+      sizeBytes: activeAttachment.sizeBytes,
+      isUploading: false
     });
+    renderDocInfoInWelcome(activeAttachment.fileName, activeAttachment.sizeBytes, false);
   } else {
-    document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'flex');
+    activeAttachment = null;
+    clearAttachmentBar();
   }
 
+  if (Array.isArray(target.messages) && target.messages.length > 0) {
+    target.messages.forEach(m => {
+      renderMessage(m.role, m.text, m.isErr || false, m.time, m.meta || null);
+    });
+  }
+
+  updateViewState();
   renderSidebarChatList($('sidebar-search-input')?.value || '');
   if (window.innerWidth <= 640) toggleSidebar(false);
   focusActiveInput();
@@ -2566,15 +3184,23 @@ function switchChat(chatId) {
 
 function startNewChat(fromSidebar = false) {
   if (busy) return;
+  removeAttachment();
   currentChatId = null;
   document.querySelectorAll('.messages-container').forEach(c => c.innerHTML = '');
-  document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'flex');
+  updateViewState();
   renderSidebarChatList($('sidebar-search-input')?.value || '');
   if (fromSidebar && window.innerWidth <= 640) toggleSidebar(false);
-  focusActiveInput();
 }
 
 function deleteChat(chatId) {
+  const target = sessionChats.find(c => c.id === chatId);
+  if (target && target.pdf && target.pdf.fileId) {
+    fetch('/delete-file', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_id: target.pdf.fileId })
+    }).catch(() => {});
+  }
   sessionChats = sessionChats.filter(c => c.id !== chatId);
   saveSessionChats();
 
@@ -2672,8 +3298,9 @@ function scrollBottom() {
   });
 }
 
-function renderMessage(role, text, isErr = false, customTime = null) {
-  document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'none');
+function renderMessage(role, text, isErr = false, customTime = null, meta = null) {
+  document.querySelectorAll('.source-upload-screen').forEach(h => h.style.display = 'none');
+  document.querySelectorAll('.doc-welcome-zone').forEach(h => h.style.display = 'none');
   const isUser = role === 'user';
 
   // Construct message row
@@ -2716,6 +3343,22 @@ function renderMessage(role, text, isErr = false, customTime = null) {
       bub.innerHTML = `<div class="md-content">${cleanHtml}</div>`;
     } else {
       bub.innerHTML = esc(text).replace(/\n/g, '<br>');
+    }
+
+    // Insert grounded badge if AI response is document-grounded
+    if (!isUser && !isErr && meta && meta.grounded) {
+      const gBadge = document.createElement('div');
+      gBadge.className = 'grounded-badge';
+      gBadge.textContent = '✦ Grounded in Document';
+      bub.insertBefore(gBadge, bub.firstChild);
+    }
+
+    // Insert document indicator badge if user question had an attached document
+    if (isUser && meta && meta.fileName) {
+      const docBadge = document.createElement('div');
+      docBadge.className = 'msg-doc-badge';
+      docBadge.innerHTML = `<span class="attachment-icon">📄</span> <span>${esc(meta.fileName)}</span>`;
+      bub.insertBefore(docBadge, bub.firstChild);
     }
 
     if (!isUser && !isErr) {
@@ -2836,6 +3479,230 @@ function setLoading(state) {
 }
 
 /* ═══════════════════════════════════════════
+   DOCUMENT ATTACHMENT & GROUNDING LOGIC
+═══════════════════════════════════════════ */
+let activeAttachment = null; // { fileId, fileName, sizeBytes }
+
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function updateComposerState() {
+  const hasPdf = !!activeAttachment;
+  document.querySelectorAll('textarea.msg-input').forEach(inp => {
+    if (hasPdf) {
+      inp.placeholder = `Ask a question grounded in ${activeAttachment.fileName}...`;
+      inp.disabled = false;
+    } else {
+      inp.placeholder = 'Please upload a PDF first to ask questions...';
+      inp.disabled = true;
+    }
+  });
+}
+
+function updateViewState() {
+  const hasPdf = !!(activeAttachment && activeAttachment.fileId);
+  const activeChat = currentChatId ? sessionChats.find(c => c.id === currentChatId) : null;
+  const hasMessages = activeChat && Array.isArray(activeChat.messages) && activeChat.messages.length > 0;
+
+  // 1. Source upload screen: only visible when NO PDF is loaded
+  document.querySelectorAll('.source-upload-screen').forEach(el => {
+    el.style.display = hasPdf ? 'none' : 'flex';
+  });
+
+  // 2. Doc QA screen: only visible when a PDF IS loaded
+  document.querySelectorAll('.doc-qa-screen').forEach(el => {
+    el.style.display = hasPdf ? 'flex' : 'none';
+  });
+
+  // 3. Welcome inquiries: only visible when a PDF is loaded AND no messages yet
+  document.querySelectorAll('.doc-welcome-zone').forEach(el => {
+    el.style.display = (hasPdf && !hasMessages) ? 'flex' : 'none';
+  });
+
+  // 4. Composer zone: strictly hidden when NO PDF is loaded
+  document.querySelectorAll('.composer-zone').forEach(el => {
+    el.style.display = hasPdf ? 'block' : 'none';
+  });
+
+  updateComposerState();
+}
+
+function renderDocInfoInWelcome(fileName, sizeBytes, isUploading) {
+  const sizeText = formatBytes(sizeBytes);
+  document.querySelectorAll('.doc-file-name').forEach(el => { el.textContent = fileName; el.title = fileName; });
+  document.querySelectorAll('.doc-file-size').forEach(el => { el.textContent = isUploading ? 'Uploading...' : sizeText; });
+  document.querySelectorAll('.doc-status-badge').forEach(el => {
+    el.textContent = isUploading ? 'Uploading to Gemini...' : 'Locked Source';
+  });
+}
+
+function renderAttachmentBar({ fileName, sizeBytes, isUploading }) {
+  const sizeText = formatBytes(sizeBytes);
+  const chipHtml = `
+    <div class="attachment-chip ${isUploading ? 'uploading' : ''}">
+      <span class="attachment-icon">📄</span>
+      <span class="attachment-name" title="${esc(fileName)}">${esc(fileName)}</span>
+      <span class="attachment-size">${isUploading ? '<span class="attachment-spinner"></span> Uploading PDF...' : sizeText + ' • Locked Source'}</span>
+      ${!isUploading ? '<button type="button" class="attachment-remove-btn" onclick="removeAttachment()" title="Remove PDF" aria-label="Remove PDF">✕</button>' : ''}
+    </div>
+  `;
+  document.querySelectorAll('.composer-attachment-bar').forEach(bar => {
+    bar.innerHTML = chipHtml;
+    bar.style.display = 'flex';
+  });
+}
+
+function clearAttachmentBar() {
+  document.querySelectorAll('.composer-attachment-bar').forEach(bar => {
+    bar.innerHTML = '';
+    bar.style.display = 'none';
+  });
+}
+
+function triggerAttachment(e) {
+  if (e) {
+    e.stopPropagation();
+  }
+  if (busy) return;
+  const fileInput = document.getElementById('file-upload-input');
+  if (fileInput) {
+    fileInput.click();
+  }
+}
+
+async function uploadPdfFile(file) {
+  if (!file) return;
+
+  // Strict PDF validation on client side
+  if (!file.name.toLowerCase().endsWith('.pdf')) {
+    alert('Only PDF files are supported. Please upload a .pdf document.');
+    return;
+  }
+
+  const maxBytes = 20 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    alert('File exceeds maximum allowed size of 20 MB.');
+    return;
+  }
+
+  // If replacing an existing PDF, clean up previous file on Gemini
+  if (activeAttachment && activeAttachment.fileId) {
+    const oldFileId = activeAttachment.fileId;
+    fetch('/delete-file', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_id: oldFileId })
+    }).catch(() => {});
+  }
+
+  renderAttachmentBar({
+    fileName: file.name,
+    sizeBytes: file.size,
+    isUploading: true
+  });
+  renderDocInfoInWelcome(file.name, file.size, true);
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to upload PDF.');
+    }
+
+    activeAttachment = {
+      fileId: data.file_id,
+      fileName: data.file_name,
+      sizeBytes: data.size_bytes
+    };
+
+    // Bind active PDF to current chat session
+    if (currentChatId) {
+      const activeChat = sessionChats.find(c => c.id === currentChatId);
+      if (activeChat) {
+        activeChat.pdf = { ...activeAttachment };
+        saveSessionChats();
+      }
+    }
+
+    renderAttachmentBar({
+      fileName: activeAttachment.fileName,
+      sizeBytes: activeAttachment.sizeBytes,
+      isUploading: false
+    });
+    renderDocInfoInWelcome(activeAttachment.fileName, activeAttachment.sizeBytes, false);
+    updateViewState();
+    focusActiveInput();
+  } catch (err) {
+    alert('Upload failed: ' + err.message);
+    clearAttachmentBar();
+    activeAttachment = null;
+    updateViewState();
+  }
+}
+
+function handleFileSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if (file) {
+    uploadPdfFile(file);
+  }
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.querySelectorAll('.pdf-hero-dropzone').forEach(el => el.classList.add('drag-active'));
+}
+
+function handleDragLeave(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.querySelectorAll('.pdf-hero-dropzone').forEach(el => el.classList.remove('drag-active'));
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.querySelectorAll('.pdf-hero-dropzone').forEach(el => el.classList.remove('drag-active'));
+  const files = e.dataTransfer && e.dataTransfer.files;
+  if (files && files.length > 0) {
+    uploadPdfFile(files[0]);
+  }
+}
+
+async function removeAttachment() {
+  if (activeAttachment && activeAttachment.fileId) {
+    const fileIdToDelete = activeAttachment.fileId;
+    fetch('/delete-file', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_id: fileIdToDelete })
+    }).catch(() => {});
+  }
+  activeAttachment = null;
+  if (currentChatId) {
+    const activeChat = sessionChats.find(c => c.id === currentChatId);
+    if (activeChat) {
+      delete activeChat.pdf;
+      saveSessionChats();
+    }
+  }
+  clearAttachmentBar();
+  updateViewState();
+}
+
+/* ═══════════════════════════════════════════
    MESSAGE SUBMISSION & BACKEND API CALL
 ═══════════════════════════════════════════ */
 async function submitMessage() {
@@ -2845,11 +3712,20 @@ async function submitMessage() {
   const text = (activeInput?.value || '').trim();
   if (!text || busy) return;
 
+  // Gate message submission: PDF upload is required
+  if (!activeAttachment || !activeAttachment.fileId) {
+    alert('Please upload a PDF first. General questions are disabled.');
+    triggerAttachment();
+    return;
+  }
+
   document.querySelectorAll('textarea.msg-input').forEach(inp => {
     inp.value = '';
     inp.style.height = 'auto';
   });
   document.querySelectorAll('.composer-btn-send').forEach(btn => btn.classList.remove('active'));
+
+  const boundPdf = { ...activeAttachment };
 
   if (!currentChatId) {
     const newId = 'chat_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
@@ -2859,7 +3735,8 @@ async function submitMessage() {
       title: title,
       time: now(),
       timestamp: Date.now(),
-      messages: []
+      messages: [],
+      pdf: boundPdf
     };
     sessionChats.unshift(newChatObj);
     currentChatId = newId;
@@ -2868,11 +3745,21 @@ async function submitMessage() {
   }
 
   const activeChat = sessionChats.find(c => c.id === currentChatId);
+  if (activeChat && !activeChat.pdf) {
+    activeChat.pdf = boundPdf;
+    saveSessionChats();
+  }
+
   const msgTime = now();
 
-  renderMessage('user', text, false, msgTime);
+  renderMessage('user', text, false, msgTime, { fileName: boundPdf.fileName });
   if (activeChat) {
-    activeChat.messages.push({ role: 'user', text: text, time: msgTime });
+    activeChat.messages.push({
+      role: 'user',
+      text: text,
+      time: msgTime,
+      meta: { fileName: boundPdf.fileName }
+    });
     saveSessionChats();
   }
 
@@ -2880,10 +3767,15 @@ async function submitMessage() {
   showTyping();
 
   try {
+    const payload = {
+      message: text,
+      file_id: boundPdf.fileId
+    };
+
     const res = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify(payload),
     });
 
     let data = null;
@@ -2904,10 +3796,11 @@ async function submitMessage() {
     }
 
     const aiTime = now();
-    renderMessage('ai', data.reply, false, aiTime);
+    const aiMeta = { grounded: true };
+    renderMessage('ai', data.reply, false, aiTime, aiMeta);
 
     if (activeChat) {
-      activeChat.messages.push({ role: 'ai', text: data.reply, time: aiTime });
+      activeChat.messages.push({ role: 'ai', text: data.reply, time: aiTime, meta: aiMeta });
       saveSessionChats();
     }
 
@@ -2925,16 +3818,17 @@ async function submitMessage() {
 
 function sendPrompt(text) {
   if (busy) return;
+  if (!activeAttachment || !activeAttachment.fileId) {
+    alert('Please upload a PDF first. General questions are disabled.');
+    triggerAttachment();
+    return;
+  }
   document.querySelectorAll('textarea.msg-input').forEach(inp => {
     inp.value = text;
     inp.style.height = 'auto';
     inp.style.height = Math.min(inp.scrollHeight, 140) + 'px';
   });
   submitMessage();
-}
-
-function triggerAttachment() {
-  alert('Attachment upload: File attachments will be available in the next release.');
 }
 
 document.querySelectorAll('textarea.msg-input').forEach(inp => {
@@ -3089,16 +3983,12 @@ window.addEventListener('DOMContentLoaded', () => {
     openVoiceMode();
   } else if (urlParams.get('sidebar') === '1') {
     toggleSidebar(true);
-  } else if (urlParams.get('mock') === '1') {
-    renderMessage('user', 'Explain the difference between supervised and unsupervised learning.');
-    renderMessage('ai', '### Supervised vs. Unsupervised Learning\n\n**Supervised Learning** relies on labeled training data:\n- Target output is known (e.g., classification, regression)\n- Example: Spam detection with tagged emails\n\n```python\n# Supervised Linear Regression\nfrom sklearn.linear_model import LinearRegression\nmodel = LinearRegression().fit(X_train, y_train)\n```\n\n**Unsupervised Learning** discovers latent patterns and clusters without labels:\n- Identifies structure, groupings, or dimensionality reductions\n- Example: K-Means clustering, PCA');
-  } else if (sessionChats.length > 0) {
+  } else if (sessionChats.length > 0 && sessionChats[0].pdf) {
     switchChat(sessionChats[0].id);
   } else {
-    document.querySelectorAll('.home-screen').forEach(h => h.style.display = 'flex');
+    activeAttachment = null;
+    updateViewState();
   }
-
-  focusActiveInput();
 });
 </script>
 
@@ -3252,7 +4142,9 @@ function initTopoShader(canvasId, isDarkLayer) {
 
 initTopoShader('topo-canvas-light', false);
 initTopoShader('topo-canvas-dark', true);
+updateViewState();
 </script>
 
+<input type="file" id="file-upload-input" accept=".pdf,application/pdf" style="display:none;" onchange="handleFileSelected(event)" />
 </body>
 </html>

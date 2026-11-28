@@ -16,7 +16,9 @@ Features:
 
 import os
 import logging
+import tempfile
 from typing import Optional
+from werkzeug.utils import secure_filename
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -60,6 +62,25 @@ MODELS = [
     if m.strip()
 ]
 MAX_MESSAGE_LENGTH = 2000
+
+# Allowed file formats & size limits for PDF-only document QA
+ALLOWED_EXTENSIONS = {"pdf"}
+MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB limit
+
+STRICT_GROUNDING_INSTRUCTION = (
+    "You are a strict, source-locked document Q&A assistant (NotebookLM style).\n"
+    "CRITICAL INSTRUCTIONS:\n"
+    "1. Answer the user's question using ONLY explicit facts directly mentioned in the attached PDF.\n"
+    "2. Cite exact page numbers, section titles, or verbatim quote evidence from the PDF wherever available.\n"
+    "3. Make ZERO assumptions, extrapolations, or outside world knowledge.\n"
+    "4. If the answer is not explicitly supported by the attached PDF, you MUST respond EXACTLY with the phrase:\n"
+    "   'Not present in the uploaded document.'\n"
+    "5. Never attempt to answer from general knowledge."
+)
+
+def allowed_file(filename: str) -> bool:
+    """Returns True if the filename has an allowed extension (.pdf only)."""
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Singleton Google GenAI Client
 _client: Optional[genai.Client] = None
@@ -129,12 +150,132 @@ def health():
         "models": MODELS
     }), 200
 
+@app.route("/upload", methods=["POST"])
+@limiter.limit("15 per minute")
+def upload_file():
+    """
+    Uploads a document to Google Gemini File API for grounded document QA.
+    Validates file format and size, stores in a temporary file, uploads to Gemini,
+    and immediately deletes the local temporary file.
+    """
+    client = get_genai_client()
+    if not client:
+        return jsonify({
+            "error": "Gemini API key is not configured on the server.",
+            "code": "API_KEY_MISSING"
+        }), 503
+
+    if "file" not in request.files:
+        return jsonify({
+            "error": "No file part in request.",
+            "code": "MISSING_FILE"
+        }), 400
+
+    file = request.files["file"]
+    if not file or not file.filename or not file.filename.strip():
+        return jsonify({
+            "error": "No selected file.",
+            "code": "EMPTY_FILENAME"
+        }), 400
+
+    original_filename = secure_filename(file.filename.strip())
+    if not allowed_file(original_filename):
+        return jsonify({
+            "error": "Only PDF files are supported. Please upload a .pdf document.",
+            "code": "INVALID_FILE_TYPE"
+        }), 400
+
+    content = file.read()
+    if len(content) > MAX_FILE_SIZE:
+        return jsonify({
+            "error": f"File exceeds maximum allowed size of {MAX_FILE_SIZE // (1024 * 1024)} MB.",
+            "code": "FILE_TOO_LARGE"
+        }), 413
+
+    suffix = "." + original_filename.rsplit(".", 1)[1].lower() if "." in original_filename else ""
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+    temp_path = temp_file.name
+
+    try:
+        temp_file.write(content)
+        temp_file.close()
+
+        logger.info(f"Uploading file '{original_filename}' ({len(content)} bytes) to Gemini File API...")
+        uploaded_file = client.files.upload(
+            file=temp_path,
+            config=types.UploadFileConfig(display_name=original_filename)
+        )
+        logger.info(f"Successfully uploaded to Gemini as '{uploaded_file.name}'")
+
+        return jsonify({
+            "file_id": uploaded_file.name,
+            "file_name": original_filename,
+            "mime_type": uploaded_file.mime_type or "application/octet-stream",
+            "size_bytes": len(content)
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Failed to upload file to Gemini File API: {e}")
+        return jsonify({
+            "error": f"Failed to upload file to Gemini API: {str(e)}",
+            "code": "UPLOAD_FAILED"
+        }), 500
+
+    finally:
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception as ex:
+                logger.warning(f"Failed to remove temporary file {temp_path}: {ex}")
+
+@app.route("/delete-file", methods=["POST"])
+@limiter.limit("30 per minute")
+def delete_file():
+    """
+    Deletes an uploaded file from Gemini File API when detached or session resets.
+    """
+    client = get_genai_client()
+    if not client:
+        return jsonify({
+            "error": "Gemini API key is not configured on the server.",
+            "code": "API_KEY_MISSING"
+        }), 503
+
+    if not request.is_json:
+        return jsonify({
+            "error": "Request body must be valid application/json.",
+            "code": "INVALID_JSON"
+        }), 400
+
+    data = request.get_json(silent=True) or {}
+    file_id = data.get("file_id")
+    if not file_id or not isinstance(file_id, str) or not file_id.startswith("files/"):
+        return jsonify({
+            "error": "Field 'file_id' must be a valid Gemini file identifier (e.g. 'files/...').",
+            "code": "INVALID_FILE_ID"
+        }), 400
+
+    try:
+        logger.info(f"Deleting file '{file_id}' from Gemini...")
+        client.files.delete(name=file_id)
+        return jsonify({
+            "status": "deleted",
+            "file_id": file_id
+        }), 200
+    except Exception as e:
+        logger.warning(f"Error deleting file '{file_id}': {e}")
+        return jsonify({
+            "status": "deleted_or_expired",
+            "file_id": file_id
+        }), 200
+
 @app.route("/chat", methods=["POST"])
 @limiter.limit(os.environ.get("RATELIMIT_CHAT", "30 per minute; 5 per second"))
 def chat():
     """
     Processes a user message and returns an AI-generated response.
-    Validates the input and queries Gemini with automated model fallback.
+    Supports grounded document QA when file_id is provided, otherwise conversational mode.
+    Validates input and queries Gemini with automated model fallback.
     """
     # 1. Validate JSON body
     if not request.is_json:
@@ -177,6 +318,20 @@ def chat():
             "code": "MESSAGE_TOO_LONG"
         }), 413
 
+    # Mandatory file_id validation for source-locked PDF QA
+    file_id = data.get("file_id")
+    if not file_id:
+        return jsonify({
+            "error": "Please upload a PDF first. General questions are disabled.",
+            "code": "NO_PDF_UPLOADED"
+        }), 400
+
+    if not isinstance(file_id, str) or not file_id.startswith("files/"):
+        return jsonify({
+            "error": "Field 'file_id' must be a valid Gemini file identifier.",
+            "code": "INVALID_FILE_ID"
+        }), 400
+
     # 3. Verify API key & client
     client = get_genai_client()
     if not client:
@@ -185,16 +340,30 @@ def chat():
             "code": "API_KEY_MISSING"
         }), 503
 
-    # 4. Generate AI response with model fallback
+    # Retrieve remote PDF reference
+    try:
+        uploaded_file = client.files.get(name=file_id)
+    except Exception as e:
+        logger.error(f"Failed to retrieve file '{file_id}' from Gemini: {e}")
+        return jsonify({
+            "error": "The attached PDF could not be found or has expired. Please re-upload.",
+            "code": "FILE_NOT_FOUND"
+        }), 404
+
+    # 4. Generate AI response with model fallback (strictly source-locked)
     response_text = None
     last_error = None
 
     for model in MODELS:
         try:
-            logger.info(f"Generating response using model: {model}")
+            logger.info(f"Generating source-locked response using model: {model}")
             res = client.models.generate_content(
                 model=model,
-                contents=message
+                contents=[uploaded_file, message],
+                config=types.GenerateContentConfig(
+                    system_instruction=STRICT_GROUNDING_INSTRUCTION,
+                    temperature=0.0
+                )
             )
             if res and res.text:
                 response_text = res.text
@@ -230,7 +399,8 @@ def chat():
         }), 503
 
     return jsonify({
-        "reply": response_text
+        "reply": response_text,
+        "grounded": bool(uploaded_file)
     }), 200
 
 # ── ENTRYPOINT ──────────────────────────────────────────────────────────────
