@@ -55,12 +55,22 @@ limiter = Limiter(
     default_limits=["120 per minute"]
 )
 
-# Supported Gemini models in priority order
-MODELS = [
-    m.strip()
-    for m in os.getenv("GEMINI_MODELS", "gemini-2.5-flash,gemini-3.1-flash-lite").split(",")
-    if m.strip()
-]
+# Primary and fallback model configuration (strictly 2-model fallback, configurable via env)
+PRIMARY_MODEL = os.getenv("PRIMARY_MODEL") or os.getenv("GEMINI_PRIMARY_MODEL")
+FALLBACK_MODEL = os.getenv("FALLBACK_MODEL") or os.getenv("GEMINI_FALLBACK_MODEL")
+
+if not PRIMARY_MODEL or not FALLBACK_MODEL:
+    legacy_models = [
+        m.strip()
+        for m in os.getenv("GEMINI_MODELS", "gemini-2.5-flash,gemini-3.1-flash-lite").split(",")
+        if m.strip()
+    ]
+    if not PRIMARY_MODEL:
+        PRIMARY_MODEL = legacy_models[0] if len(legacy_models) > 0 else "gemini-2.5-flash"
+    if not FALLBACK_MODEL:
+        FALLBACK_MODEL = legacy_models[1] if len(legacy_models) > 1 else "gemini-3.1-flash-lite"
+
+MODELS = [PRIMARY_MODEL, FALLBACK_MODEL]
 MAX_MESSAGE_LENGTH = 2000
 
 # Allowed file formats & size limits for PDF-only document QA
@@ -81,6 +91,24 @@ STRICT_GROUNDING_INSTRUCTION = (
 def allowed_file(filename: str) -> bool:
     """Returns True if the filename has an allowed extension (.pdf only)."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_rate_limit_error(exc: Exception) -> bool:
+    """
+    Checks if an exception represents a rate limit / quota exhaustion
+    (e.g. HTTP 429 or RESOURCE_EXHAUSTED).
+    """
+    if isinstance(exc, genai_errors.ClientError):
+        code = getattr(exc, "code", None)
+        if code == 429:
+            return True
+
+    err_str = str(exc).lower()
+    return (
+        "429" in err_str
+        or "resource_exhausted" in err_str
+        or "quota" in err_str
+        or "rate limit" in err_str
+    )
 
 # Singleton Google GenAI Client
 _client: Optional[genai.Client] = None
@@ -147,6 +175,8 @@ def health():
         "status": "online",
         "service": "lumen-ai",
         "api_configured": bool(os.getenv("GEMINI_API_KEY")),
+        "primary_model": PRIMARY_MODEL,
+        "fallback_model": FALLBACK_MODEL,
         "models": MODELS
     }), 200
 
@@ -350,15 +380,47 @@ def chat():
             "code": "FILE_NOT_FOUND"
         }), 404
 
-    # 4. Generate AI response with model fallback (strictly source-locked)
+    # 4. Generate AI response with strictly 2-model fallback (no Live API)
+    # Step 4a: Call PRIMARY_MODEL with temperature=0.0 and strict document grounding
     response_text = None
+    model_used = None
     last_error = None
 
-    for model in MODELS:
+    try:
+        logger.info(f"Generating source-locked response using primary model: {PRIMARY_MODEL}")
+        res = client.models.generate_content(
+            model=PRIMARY_MODEL,
+            contents=[uploaded_file, message],
+            config=types.GenerateContentConfig(
+                system_instruction=STRICT_GROUNDING_INSTRUCTION,
+                temperature=0.0
+            )
+        )
+        if res and res.text:
+            response_text = res.text
+            model_used = PRIMARY_MODEL
+    except genai_errors.ClientError as ce:
+        last_error = ce
+        err_lower = str(ce).lower()
+        logger.warning(f"ClientError on primary model '{PRIMARY_MODEL}': {err_lower}")
+
+        # Authentication failure cannot be recovered by model fallback
+        if "401" in err_lower or "403" in err_lower or "api_key" in err_lower:
+            return jsonify({
+                "error": "Gemini API key authentication failed.",
+                "code": "AUTHENTICATION_FAILED"
+            }), 503
+
+    except Exception as e:
+        last_error = e
+        logger.warning(f"Error on primary model '{PRIMARY_MODEL}': {e}")
+
+    # Step 4b: Fallback to FALLBACK_MODEL if primary model failed (rate limit 429 / RESOURCE_EXHAUSTED or failure)
+    if not response_text and FALLBACK_MODEL and FALLBACK_MODEL != PRIMARY_MODEL:
         try:
-            logger.info(f"Generating source-locked response using model: {model}")
+            logger.info(f"Attempting single fallback to model: {FALLBACK_MODEL}")
             res = client.models.generate_content(
-                model=model,
+                model=FALLBACK_MODEL,
                 contents=[uploaded_file, message],
                 config=types.GenerateContentConfig(
                     system_instruction=STRICT_GROUNDING_INSTRUCTION,
@@ -367,32 +429,30 @@ def chat():
             )
             if res and res.text:
                 response_text = res.text
-                break
+                model_used = FALLBACK_MODEL
         except genai_errors.ClientError as ce:
-            last_error = str(ce)
-            err_lower = last_error.lower()
-            logger.warning(f"ClientError on model '{model}': {err_lower}")
+            last_error = ce
+            err_lower = str(ce).lower()
+            logger.warning(f"ClientError on fallback model '{FALLBACK_MODEL}': {err_lower}")
 
-            # If model is deprecated or not found, proceed to next model
-            if "404" in err_lower or "not_found" in err_lower:
-                continue
-
-            # Authentication failure is unrecoverable via retry
             if "401" in err_lower or "403" in err_lower or "api_key" in err_lower:
                 return jsonify({
                     "error": "Gemini API key authentication failed.",
                     "code": "AUTHENTICATION_FAILED"
                 }), 503
 
-            continue
-
         except Exception as e:
-            last_error = str(e)
-            logger.warning(f"Error on model '{model}': {last_error}")
-            continue
+            last_error = e
+            logger.warning(f"Error on fallback model '{FALLBACK_MODEL}': {e}")
 
     if not response_text:
-        logger.error(f"All models failed. Last error: {last_error}")
+        logger.error(f"Both primary and fallback models failed. Last error: {last_error}")
+        if last_error and is_rate_limit_error(last_error):
+            return jsonify({
+                "error": "Rate limit exceeded on all AI models. Please wait a moment before trying again.",
+                "code": "RATE_LIMIT_EXCEEDED"
+            }), 429
+
         return jsonify({
             "error": "All AI models are currently unavailable. Please try again shortly.",
             "code": "PROVIDER_UNAVAILABLE"
@@ -400,7 +460,8 @@ def chat():
 
     return jsonify({
         "reply": response_text,
-        "grounded": bool(uploaded_file)
+        "grounded": bool(uploaded_file),
+        "model_used": model_used
     }), 200
 
 # ── ENTRYPOINT ──────────────────────────────────────────────────────────────

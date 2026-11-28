@@ -13,7 +13,8 @@ import io
 os.environ["RATELIMIT_STORAGE_URI"] = "memory://"
 os.environ["RATELIMIT_CHAT"] = "5 per minute; 2 per second"
 
-from app import app, limiter, MAX_MESSAGE_LENGTH, MAX_FILE_SIZE
+from google.genai import errors as genai_errors
+from app import app, limiter, MAX_MESSAGE_LENGTH, MAX_FILE_SIZE, PRIMARY_MODEL, FALLBACK_MODEL
 
 class LumenAITestCase(unittest.TestCase):
     def setUp(self):
@@ -34,6 +35,8 @@ class LumenAITestCase(unittest.TestCase):
         self.assertEqual(data.get("service"), "lumen-ai")
         self.assertIn("api_configured", data)
         self.assertIn("models", data)
+        self.assertEqual(data.get("primary_model"), PRIMARY_MODEL)
+        self.assertEqual(data.get("fallback_model"), FALLBACK_MODEL)
         res.close()
 
     def test_homepage_serves_html(self):
@@ -131,7 +134,63 @@ class LumenAITestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.get_json()
         self.assertEqual(data.get("reply"), "This is a stellar celestial reply from Lumen.")
-        self.assertTrue(mock_client.models.generate_content.called)
+        self.assertEqual(data.get("model_used"), PRIMARY_MODEL)
+        self.assertEqual(mock_client.models.generate_content.call_count, 1)
+        res.close()
+
+    @patch("app.get_genai_client")
+    def test_chat_fallback_on_primary_rate_limit_429(self, mock_get_client):
+        """Verify that when PRIMARY_MODEL hits a 429 rate limit, /chat immediately retries FALLBACK_MODEL once."""
+        mock_client = MagicMock()
+        mock_file = MagicMock()
+        mock_client.files.get.return_value = mock_file
+
+        # 1st call (primary) raises 429 ClientError, 2nd call (fallback) succeeds
+        rate_limit_err = genai_errors.ClientError(429, "Resource has been exhausted (e.g. check quota)")
+        mock_success = MagicMock()
+        mock_success.text = "Grounded response from fallback model."
+
+        mock_client.models.generate_content.side_effect = [rate_limit_err, mock_success]
+        mock_get_client.return_value = mock_client
+
+        res = self.client.post("/chat", json={
+            "message": "What is the key takeaway?",
+            "file_id": "files/test_pdf"
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data.get("reply"), "Grounded response from fallback model.")
+        self.assertEqual(data.get("model_used"), FALLBACK_MODEL)
+        self.assertTrue(data.get("grounded"))
+        self.assertEqual(mock_client.models.generate_content.call_count, 2)
+
+        # First call was with PRIMARY_MODEL, second with FALLBACK_MODEL
+        calls = mock_client.models.generate_content.call_args_list
+        self.assertEqual(calls[0].kwargs["model"], PRIMARY_MODEL)
+        self.assertEqual(calls[1].kwargs["model"], FALLBACK_MODEL)
+        self.assertEqual(calls[1].kwargs["config"].temperature, 0.0)
+        res.close()
+
+    @patch("app.get_genai_client")
+    def test_chat_both_models_rate_limited_returns_429(self, mock_get_client):
+        """Verify that when both PRIMARY_MODEL and FALLBACK_MODEL hit 429, /chat returns 429 RATE_LIMIT_EXCEEDED."""
+        mock_client = MagicMock()
+        mock_file = MagicMock()
+        mock_client.files.get.return_value = mock_file
+
+        rate_limit_err = genai_errors.ClientError(429, "Resource exhausted (quota exceeded)")
+        mock_client.models.generate_content.side_effect = [rate_limit_err, rate_limit_err]
+        mock_get_client.return_value = mock_client
+
+        res = self.client.post("/chat", json={
+            "message": "What is in chapter 1?",
+            "file_id": "files/test_pdf"
+        })
+        self.assertEqual(res.status_code, 429)
+        data = res.get_json()
+        self.assertEqual(data.get("code"), "RATE_LIMIT_EXCEEDED")
+        self.assertIn("Rate limit exceeded on all AI models", data.get("error"))
+        self.assertEqual(mock_client.models.generate_content.call_count, 2)
         res.close()
 
     @patch("app.get_genai_client")
